@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// Define the environment variable schema
 const serverSchema = z.object({
   MONGODB_URI: z.string().url(),
   PUSHER_APP_ID: z.string(),
@@ -20,12 +21,24 @@ const serverSchema = z.object({
   NEXTAUTH_URL: z.string().url().optional(),
 });
 
+// Parse and validate environment variables
 const parsed = serverSchema.safeParse(process.env);
 
+// Check if the parsed environment variables are valid
 if (!parsed.success) {
-  // Fail fast with a readable error set.
+  // Log each missing or invalid environment variable
+  Object.keys(serverSchema.shape).forEach((key) => {
+    if (!process.env[key]) {
+      console.error(`Environment variable ${key} is missing or invalid.`);
+    }
+  });
+
+  // Log detailed error message
   console.error('Invalid server environment variables', parsed.error.format());
+  
+  // Fail the application if variables are invalid
   throw new Error('Invalid server environment variables');
 }
 
+// Export validated environment variables
 export const serverEnv = parsed.data;
