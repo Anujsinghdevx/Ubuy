@@ -98,25 +98,19 @@ export default function MegaAuction({
   const isoDuration = useMemo(() => toISODuration(timeLeft), [timeLeft]);
   const display = useMemo(() => formatHMS(timeLeft), [timeLeft]);
 
-  const flameAnimate = reduceMotion
-    ? {}
-    : { scale: [1, 1.1, 0.98, 1], opacity: [1, 0.95, 1, 1] };
+  const flameAnimate = reduceMotion ? {} : { scale: [1, 1.1, 0.98, 1], opacity: [1, 0.95, 1, 1] };
 
   const flameTransition = reduceMotion
     ? {}
     : { repeat: Infinity, repeatType: 'loop' as const, duration: 1.6, ease: 'easeInOut' };
 
-  const timeAnimate = reduceMotion
-    ? {}
-    : isCritical
-    ? { x: [0, -2, 2, -2, 2, 0] }
-    : {};
+  const timeAnimate = reduceMotion ? {} : isCritical ? { x: [0, -2, 2, -2, 2, 0] } : {};
 
   const timeTransition = reduceMotion
     ? {}
     : isCritical
-    ? { duration: 0.5, ease: 'easeInOut', repeat: 0 }
-    : {};
+      ? { duration: 0.5, ease: 'easeInOut', repeat: 0 }
+      : {};
 
   return (
     <motion.section
@@ -131,7 +125,11 @@ export default function MegaAuction({
         id="mega-auction-timer"
         className="text-2xl sm:text-3xl flex justify-center items-center font-bold mb-2"
       >
-        <motion.span animate={flameAnimate} transition={flameTransition} className="mr-2 inline-flex">
+        <motion.span
+          animate={flameAnimate}
+          transition={flameTransition}
+          className="mr-2 inline-flex"
+        >
           <Flame className="w-8 h-8 sm:w-10 sm:h-10 fill-amber-400 text-orange-500" />
         </motion.span>
         {label}

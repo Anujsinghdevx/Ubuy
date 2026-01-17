@@ -1,9 +1,9 @@
-import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import HelpPopup from "@/components/HelpPopup";
-import ClientNavbarWrapper from "@/components/ClientNavbarWrapper";
-import Providers from "@/components/Providers";
+import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import HelpPopup from '@/components/HelpPopup';
+import ClientNavbarWrapper from '@/components/ClientNavbarWrapper';
+import Providers from '@/components/Providers';
 
 export const metadata = {
   title: {
@@ -28,8 +28,7 @@ export const metadata = {
   },
 };
 
-
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -38,9 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <Providers>
           <SpeedInsights />
-          <ClientNavbarWrapper>
-            {children}
-          </ClientNavbarWrapper>
+          <ClientNavbarWrapper>{children}</ClientNavbarWrapper>
           <Toaster />
           <HelpPopup />
         </Providers>

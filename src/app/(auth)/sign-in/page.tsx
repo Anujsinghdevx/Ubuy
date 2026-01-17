@@ -1,19 +1,26 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import Link from "next/link";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
-import { signInSchema } from "@/schemas/SignInSchema";
-import { FcGoogle } from "react-icons/fc";
-import { Lock, Mail } from "lucide-react";
-import Image from "next/image";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { signIn } from 'next-auth/react';
+import { signInSchema } from '@/schemas/SignInSchema';
+import { FcGoogle } from 'react-icons/fc';
+import { Lock, Mail } from 'lucide-react';
+import Image from 'next/image';
 
 const Page = () => {
   const router = useRouter();
@@ -21,23 +28,23 @@ const Page = () => {
   const form = useForm({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      identifier: "",
-      password: "",
+      identifier: '',
+      password: '',
     },
   });
 
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    const result = await signIn("credentials", {
+    const result = await signIn('credentials', {
       redirect: false,
       identifier: data.identifier,
       password: data.password,
     });
 
     if (result?.error) {
-      toast.error("Invalid credentials");
+      toast.error('Invalid credentials');
     }
     if (result?.url) {
-      router.replace("/");
+      router.replace('/');
     }
   };
 
@@ -53,7 +60,6 @@ const Page = () => {
 
       {/* Overlay Card Container */}
       <div className="relative z-10 w-full max-w-6xl min-h-[60vh] sm:min-h-[80vh] grid grid-cols-1 md:grid-cols-2 bg-gray-100 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden mx-4">
-
         {/* Form Side */}
         <div className="flex flex-col justify-center h-full px-8 py-12 md:px-12">
           {/* Heading */}
@@ -75,12 +81,18 @@ const Page = () => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-800">Email or Username</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-800">
+                      Email or Username
+                    </FormLabel>
                     <FormControl>
                       <div className="flex items-center relative">
-                      <Mail className="absolute left-3 text-gray-400" size={20} />
-                      <Input placeholder="Enter your email/username" className="pl-10 border border-gray-300 focus:border-emerald-500 focus:ring-emerald-500" {...field} />
-                    </div>
+                        <Mail className="absolute left-3 text-gray-400" size={20} />
+                        <Input
+                          placeholder="Enter your email/username"
+                          className="pl-10 border border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -95,18 +107,21 @@ const Page = () => {
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-800">Password</FormLabel>
                     <FormControl>
-                       <div className="flex items-center relative">
-                      <Lock className="absolute left-3  text-gray-400" size={20} />
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        className="pl-10 border border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                        {...field}
-                      />
-                    </div>
+                      <div className="flex items-center relative">
+                        <Lock className="absolute left-3  text-gray-400" size={20} />
+                        <Input
+                          type="password"
+                          placeholder="Enter your password"
+                          className="pl-10 border border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <div className="text-right mt-1">
-                      <Link href="/forgot-password" className="text-sm text-emerald-600 hover:underline">
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-emerald-600 hover:underline"
+                      >
                         Forgot Password?
                       </Link>
                     </div>
@@ -116,16 +131,17 @@ const Page = () => {
               />
 
               {/* Sign-In Button */}
-              <Button 
-              type="submit" 
-              className="w-full hover:cursor-pointer bg-emerald-500 text-white rounded-md py-2 text-sm hover:bg-emerald-600">
+              <Button
+                type="submit"
+                className="w-full hover:cursor-pointer bg-emerald-500 text-white rounded-md py-2 text-sm hover:bg-emerald-600"
+              >
                 Sign In
               </Button>
 
               {/* Google Sign-In */}
               <Button
                 type="button"
-                onClick={() => signIn("google")}
+                onClick={() => signIn('google')}
                 className="w-full flex hover:cursor-pointer items-center justify-center gap-2 border border-gray-300 bg-white text-gray-800 rounded-md py-2 text-sm hover:bg-gray-100"
               >
                 <FcGoogle size={20} /> Sign in with Google
@@ -135,13 +151,15 @@ const Page = () => {
 
           {/* Sign-Up */}
           <div className="text-center text-sm text-gray-500 mt-6">
-            Don’t have an account?{" "}
-            <Link href="/sign-up" className="text-emerald-600 hover:cursor-pointer font-medium hover:underline">
+            Don’t have an account?{' '}
+            <Link
+              href="/sign-up"
+              className="text-emerald-600 hover:cursor-pointer font-medium hover:underline"
+            >
               Sign up
             </Link>
           </div>
         </div>
-
 
         {/* Right Side Image (same image, crisp) */}
         <div className="relative hidden md:block">
@@ -159,5 +177,3 @@ const Page = () => {
 };
 
 export default Page;
-
-

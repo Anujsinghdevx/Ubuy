@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ interface FilterDrawerProps {
 export default function FilterDrawer({
   isOpen,
   onClose,
-  title = "Filters",
+  title = 'Filters',
   children,
 }: FilterDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -23,10 +23,10 @@ export default function FilterDrawer({
   // Close on ESC key press for accessibility
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
   // Focus trap on open
@@ -59,10 +59,10 @@ export default function FilterDrawer({
             ref={drawerRef}
             tabIndex={-1}
             className="relative bg-white rounded-t-2xl w-full p-4 max-h-[80vh] overflow-y-auto space-y-4 shadow-lg"
-            initial={{ y: "100%" }}
+            initial={{ y: '100%' }}
             animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             {/* Header */}
             <div className="flex justify-between items-center border-b pb-3 mb-3">
@@ -80,7 +80,6 @@ export default function FilterDrawer({
 
             {/* Children Content */}
             <div className="space-y-6">{children}</div>
-
           </motion.div>
         </motion.div>
       )}

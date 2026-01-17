@@ -1,26 +1,33 @@
-"use client";
+'use client';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { z } from "zod";
-import axios from "axios";
-import { Lock } from "lucide-react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { z } from 'zod';
+import axios from 'axios';
+import { Lock } from 'lucide-react';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 const schema = z
   .object({
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
 
 export default function ResetPasswordPage() {
@@ -31,24 +38,24 @@ export default function ResetPasswordPage() {
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      password: "",
-      confirmPassword: "",
+      password: '',
+      confirmPassword: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof schema>) => {
     try {
-      await axios.post("/api/reset-password", {
+      await axios.post('/api/reset-password', {
         username,
         password: values.password,
       });
-      toast.success("Password reset successfully");
-      router.push("/sign-in");
+      toast.success('Password reset successfully');
+      router.push('/sign-in');
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Something went wrong");
+        toast.error(error.response?.data?.message || 'Something went wrong');
       } else {
-        toast.error("Something went wrong");
+        toast.error('Something went wrong');
       }
     }
   };
@@ -65,7 +72,6 @@ export default function ResetPasswordPage() {
 
       {/* Glassmorphic Card */}
       <div className="relative z-10 w-full max-w-md bg-gray-100 backdrop-blur-md shadow-2xl rounded-2xl px-8 py-10 sm:px-10 sm:py-12 mx-4">
-
         {/* Heading */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Reset Your Password</h1>
@@ -75,7 +81,6 @@ export default function ResetPasswordPage() {
         {/* Form */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
             {/* New Password */}
             <FormField
               name="password"
@@ -85,7 +90,10 @@ export default function ResetPasswordPage() {
                   <FormLabel className="text-sm font-medium text-gray-800">New Password</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                      <Lock
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={20}
+                      />
                       <Input
                         type="password"
                         placeholder="New password"
@@ -105,10 +113,15 @@ export default function ResetPasswordPage() {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-800">Confirm Password</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-800">
+                    Confirm Password
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                      <Lock
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        size={20}
+                      />
                       <Input
                         type="password"
                         placeholder="Confirm new password"
@@ -133,6 +146,5 @@ export default function ResetPasswordPage() {
         </Form>
       </div>
     </div>
-
   );
 }

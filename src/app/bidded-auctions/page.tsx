@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Loader2, Search } from "lucide-react";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { Loader2, Search } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { toast } from 'sonner';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import Filters from "@/components/Filters";
-import FilterDrawer from "@/components/FilterDrawer";
-import AuctionCardSkeleton from "@/components/Skeleton/AuctionCardSkeleton";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import Filters from '@/components/Filters';
+import FilterDrawer from '@/components/FilterDrawer';
+import AuctionCardSkeleton from '@/components/Skeleton/AuctionCardSkeleton';
 
 interface Auction {
   _id: string;
@@ -24,7 +24,7 @@ interface Auction {
   startTime: string;
   category: string;
   endTime: string;
-  status: "active" | "closed";
+  status: 'active' | 'closed';
   createdBy: string;
   winnerId?: string;
 }
@@ -41,10 +41,10 @@ export default function BiddedAuctionsPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [sortOption, setSortOption] = useState("endingSoon");
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [sortOption, setSortOption] = useState('endingSoon');
   const [showFilters, setShowFilters] = useState(false);
 
   const { data: session } = useSession();
@@ -53,16 +53,16 @@ export default function BiddedAuctionsPage() {
   useEffect(() => {
     const fetchBiddedAuctions = async () => {
       try {
-        const res = await fetch("/api/auction/bidded-auction");
+        const res = await fetch('/api/auction/bidded-auction');
         const data = await res.json();
         if (Array.isArray(data.biddedAuctions)) {
           setAuctions(data.biddedAuctions);
         } else {
-          toast.error(data.error || "Failed to fetch bidded auctions");
+          toast.error(data.error || 'Failed to fetch bidded auctions');
         }
       } catch (err) {
-        console.error("Error fetching bidded auctions", err);
-        toast.error("Something went wrong.");
+        console.error('Error fetching bidded auctions', err);
+        toast.error('Something went wrong.');
       } finally {
         setLoading(false);
       }
@@ -78,27 +78,27 @@ export default function BiddedAuctionsPage() {
   const handlePayHere = async (auctionId: string) => {
     try {
       setProcessing(auctionId);
-      toast.loading("Generating payment link...", { id: "payment" });
+      toast.loading('Generating payment link...', { id: 'payment' });
 
-      const res = await fetch("/api/auction/notify-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auction/notify-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auctionId }),
       });
 
       const data: PaymentLinkResponse = await res.json();
-      toast.dismiss("payment");
+      toast.dismiss('payment');
 
       if (res.ok && data.payment_link) {
-        toast.success("Redirecting...");
+        toast.success('Redirecting...');
         window.location.href = data.payment_link;
       } else {
-        toast.error(data.error || "Failed to generate payment link.");
+        toast.error(data.error || 'Failed to generate payment link.');
       }
     } catch (err) {
       console.error(err);
-      toast.dismiss("payment");
-      toast.error("Something went wrong.");
+      toast.dismiss('payment');
+      toast.error('Something went wrong.');
     } finally {
       setProcessing(null);
     }
@@ -110,12 +110,12 @@ export default function BiddedAuctionsPage() {
         a.title.toLowerCase().includes(search.toLowerCase()) ||
         a.description.toLowerCase().includes(search.toLowerCase())
     )
-    .filter((a) => statusFilter === "all" || a.status === statusFilter)
-    .filter((a) => categoryFilter === "All" || a.category === categoryFilter)
+    .filter((a) => statusFilter === 'all' || a.status === statusFilter)
+    .filter((a) => categoryFilter === 'All' || a.category === categoryFilter)
     .sort((a, b) => {
-      if (sortOption === "endingSoon") {
+      if (sortOption === 'endingSoon') {
         return new Date(a.endTime).getTime() - new Date(b.endTime).getTime();
-      } else if (sortOption === "newest") {
+      } else if (sortOption === 'newest') {
         return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
       }
       return 0;
@@ -139,9 +139,9 @@ export default function BiddedAuctionsPage() {
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             priceRange={0}
-            setPriceRange={() => { }}
+            setPriceRange={() => {}}
             quickPriceFilter=""
-            setQuickPriceFilter={() => { }}
+            setQuickPriceFilter={() => {}}
             setSearch={setSearch}
             setSortOption={setSortOption}
           />
@@ -209,10 +209,20 @@ export default function BiddedAuctionsPage() {
                         </div>
 
                         <div className="text-sm text-gray-600">
-                          <p><strong>Start:</strong> {new Date(auction.startTime).toLocaleString("en-GB")}</p>
-                          <p><strong>End:</strong> {new Date(auction.endTime).toLocaleString("en-GB")}</p>
-                          <p><strong>Status:</strong> {auction.status}</p>
-                          <p><strong>Current Price:</strong> ₹{auction.currentPrice}</p>
+                          <p>
+                            <strong>Start:</strong>{' '}
+                            {new Date(auction.startTime).toLocaleString('en-GB')}
+                          </p>
+                          <p>
+                            <strong>End:</strong>{' '}
+                            {new Date(auction.endTime).toLocaleString('en-GB')}
+                          </p>
+                          <p>
+                            <strong>Status:</strong> {auction.status}
+                          </p>
+                          <p>
+                            <strong>Current Price:</strong> ₹{auction.currentPrice}
+                          </p>
                         </div>
 
                         <Button
@@ -222,7 +232,7 @@ export default function BiddedAuctionsPage() {
                           View Auction Details
                         </Button>
 
-                        {auction.status === "closed" && auction.winnerId === myUserId && (
+                        {auction.status === 'closed' && auction.winnerId === myUserId && (
                           <Button
                             className="w-full mt-2 bg-purple-600 text-white hover:bg-purple-700"
                             disabled={processing === auction._id}
@@ -234,7 +244,7 @@ export default function BiddedAuctionsPage() {
                                 Redirecting...
                               </>
                             ) : (
-                              "Pay Here"
+                              'Pay Here'
                             )}
                           </Button>
                         )}
@@ -247,11 +257,17 @@ export default function BiddedAuctionsPage() {
               {/* Pagination */}
               {filteredAuctions.length > ITEMS_PER_PAGE && (
                 <div className="flex justify-center mt-10 space-x-4">
-                  <Button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                  <Button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
                     Previous
                   </Button>
                   <span className="text-gray-700">{`Page ${currentPage} of ${totalPages}`}</span>
-                  <Button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
+                  <Button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
                     Next
                   </Button>
                 </div>
@@ -269,9 +285,9 @@ export default function BiddedAuctionsPage() {
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
           priceRange={0}
-          setPriceRange={() => { }}
+          setPriceRange={() => {}}
           quickPriceFilter=""
-          setQuickPriceFilter={() => { }}
+          setQuickPriceFilter={() => {}}
           setSearch={setSearch}
           setSortOption={setSortOption}
         />

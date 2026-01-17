@@ -4,7 +4,6 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-green.svg)
 
-
 **Ubuy** is a full-stack, real-time auction platform where users can bid, win, and list unique items. Featuring real-time bidding with Socket.IO, secure payments via Cashfree, and a sleek, responsive UI — Ubuy provides a modern, production-ready auction experience.
 
 ---
@@ -29,29 +28,29 @@
 
 ## 📸 Screenshots
 
-> _Screenshots go here. 
+> \_Screenshots go here.
 
-| Homepage | Auction Detail | Dashboard |
-|----------|----------------|-----------|
+| Homepage                        | Auction Detail                      | Dashboard                                 |
+| ------------------------------- | ----------------------------------- | ----------------------------------------- |
 | ![Home](./screenshots/home.png) | ![Detail](./screenshots/detail.png) | ![Dashboard](./screenshots/dashboard.png) |
 
 ---
 
 ## 🧱 Tech Stack
 
-| Layer       | Tools & Libraries                                      |
-|-------------|--------------------------------------------------------|
-| Frontend    | Next.js 15 • TypeScript • Tailwind CSS • ShadCN UI     |
-| Backend     | Node.js • Next API Routes • Socket.IO                  |
-| Database    | MongoDB • Mongoose ORM                                 |
-| Auth        | NextAuth.js (Google + Credentials)                     |
-| Realtime    | Pusher • Socket.IO                                     |
-| UI/UX       | Framer Motion • Lucide Icons • Swiper.js               |
-| Forms       | React Hook Form • Zod • @hookform/resolvers            |
-| Media       | Multer • Cloudinary                                    |
-| Email       | Nodemailer + SMTP                                      |
-| CAPTCHA     | Cloudflare Turnstile (via react-turnstile)            |
-| Payments    | Cashfree                                               |
+| Layer    | Tools & Libraries                                  |
+| -------- | -------------------------------------------------- |
+| Frontend | Next.js 15 • TypeScript • Tailwind CSS • ShadCN UI |
+| Backend  | Node.js • Next API Routes • Socket.IO              |
+| Database | MongoDB • Mongoose ORM                             |
+| Auth     | NextAuth.js (Google + Credentials)                 |
+| Realtime | Pusher • Socket.IO                                 |
+| UI/UX    | Framer Motion • Lucide Icons • Swiper.js           |
+| Forms    | React Hook Form • Zod • @hookform/resolvers        |
+| Media    | Multer • Cloudinary                                |
+| Email    | Nodemailer + SMTP                                  |
+| CAPTCHA  | Cloudflare Turnstile (via react-turnstile)         |
+| Payments | Cashfree                                           |
 
 ---
 
@@ -64,7 +63,9 @@ git clone https://github.com/Anuj-0-3/Ubuy.git
 cd Ubuy
 npm install
 ```
+
 ---
+
 ## 👨‍💻 Developer
 
 **Anuj Singh**  

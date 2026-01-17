@@ -3,10 +3,10 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IAuthUser extends Document {
   email: string;
   name: string;
-  provider: string;  
-  authProvider: string;  
+  provider: string;
+  authProvider: string;
   createdAt: Date;
-  biddedauction:string[];
+  biddedauction: string[];
   updatedAt: Date;
   image?: string;
 }
@@ -25,25 +25,25 @@ const AuthUserSchema: Schema = new Schema(
     },
     provider: {
       type: String,
-      default: 'google',  // Default to Google for external users
-      enum: ['google', 'facebook', 'github'], 
+      default: 'google', // Default to Google for external users
+      enum: ['google', 'facebook', 'github'],
     },
     authProvider: {
       type: String,
-      default: 'AuthUser',  
-      enum: ["AuthUser"],  
+      default: 'AuthUser',
+      enum: ['AuthUser'],
     },
     biddedauction: {
-      type: [String], 
-      default: [], 
+      type: [String],
+      default: [],
     },
-    image:{
+    image: {
       type: String,
-      default: '', 
-    }
+      default: '',
+    },
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 

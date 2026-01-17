@@ -1,10 +1,10 @@
-import dbConnect from "@/lib/dbConnect";
-import { NextResponse } from "next/server";
-import Auction from "@/models/Auction";
-import { autoCloseExpiredAuctions } from "@/lib/autoCloseExpiredAuctions";
-import "@/models/User";
-import "@/models/AuthUser";
-import Notification from "@/models/Notification";
+import dbConnect from '@/lib/dbConnect';
+import { NextResponse } from 'next/server';
+import Auction from '@/models/Auction';
+import { autoCloseExpiredAuctions } from '@/lib/autoCloseExpiredAuctions';
+import '@/models/User';
+import '@/models/AuthUser';
+import Notification from '@/models/Notification';
 
 interface Bidder {
   bidder: {
@@ -30,18 +30,18 @@ export async function GET() {
     // Manually populate both createdBy and bidders.bidder (polymorphic)
     await Auction.populate(auctions, [
       {
-        path: "createdBy",
-        select: "username email provider",
+        path: 'createdBy',
+        select: 'username email provider',
       },
       {
-        path: "bidders.bidder",
-        select: "username email provider",
+        path: 'bidders.bidder',
+        select: 'username email provider',
       },
     ]);
 
     // Filter for closed auctions that haven’t been notified
     const closedAuctions = auctions.filter(
-      (auction) => auction.status === "closed" && !auction.notified
+      (auction) => auction.status === 'closed' && !auction.notified
     );
 
     for (const auction of closedAuctions) {
@@ -56,16 +56,13 @@ export async function GET() {
         await Notification.create({
           recipient: winner.bidder._id,
           recipientModel: winner.bidderModel,
-          type: "win",
+          type: 'win',
           message: `🎉 Congratulations! You have won the auction for "${auction.title}".`,
           relatedAuction: auction._id,
         });
 
         // Update the auction with the winner's ID in the 'winner' field
-        await Auction.updateOne(
-          { _id: auction._id },
-          { $set: { winner: winner.bidder._id } }
-        );
+        await Auction.updateOne({ _id: auction._id }, { $set: { winner: winner.bidder._id } });
       }
 
       // Mark the auction as notified
@@ -74,13 +71,11 @@ export async function GET() {
     }
 
     return NextResponse.json(auctions, { status: 200 });
-
   } catch (error) {
     const errorMessage = (error as Error).message;
     return NextResponse.json(
-      { error: "Failed to fetch auctions", details: errorMessage },
+      { error: 'Failed to fetch auctions', details: errorMessage },
       { status: 500 }
     );
   }
 }
-

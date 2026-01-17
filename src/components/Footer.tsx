@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Mail } from "lucide-react";
-import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
+import Link from 'next/link';
+import { Mail } from 'lucide-react';
+import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 export default function Footer() {
   return (
@@ -14,8 +14,8 @@ export default function Footer() {
             U-Buy
           </h2>
           <p className="text-sm leading-relaxed">
-            Bid, win, and own unique collectibles and rare finds at unbeatable
-            prices. Experience seamless, real-time auctions.
+            Bid, win, and own unique collectibles and rare finds at unbeatable prices. Experience
+            seamless, real-time auctions.
           </p>
         </div>
 
@@ -91,9 +91,7 @@ export default function Footer() {
 
         {/* Contact & Social */}
         <div>
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Connect with Us
-          </h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Connect with Us</h3>
           <p className="text-sm flex items-center mb-3">
             <Mail className="w-4 h-4 mr-2" />
             <a

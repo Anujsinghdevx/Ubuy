@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from './ui/button';
-import { Menu, X, Bell } from "lucide-react";
+import { Menu, X, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import NotificationDropdown, { type Notification } from './NotificationDropdown';
@@ -21,10 +21,10 @@ function Navbar() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get("/api/notification");
+      const res = await axios.get('/api/notification');
       setNotifications(res.data.notifications);
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+      console.error('Failed to fetch notifications:', error);
     }
   };
 
@@ -36,13 +36,13 @@ function Navbar() {
     // When opening, mark as read then refresh
     if (!notificationsOpen && session) {
       try {
-        await axios.get("/api/notification/read");
+        await axios.get('/api/notification/read');
         await fetchNotifications();
       } catch (error) {
-        console.error("Error marking/fetching notifications:", error);
+        console.error('Error marking/fetching notifications:', error);
       }
     }
-    setNotificationsOpen(prev => !prev);
+    setNotificationsOpen((prev) => !prev);
   };
 
   const isActive = (href: string) => pathname === href;
@@ -91,18 +91,33 @@ function Navbar() {
         <div className="hidden md:flex text-base items-center space-x-8">
           {session ? (
             <>
-              <Link href="/auctions" className={navLinkClass('/auctions')}>Auctions</Link>
-              <Link href="/create-auction" className={navLinkClass('/create-auction')}>Create Auction</Link>
-              <Link href="/bidded-auctions" className={navLinkClass('/bidded-auctions')}>Bidded Auctions</Link>
-              <Link href="/profile" className={navLinkClass('/profile')}>Profile</Link>
+              <Link href="/auctions" className={navLinkClass('/auctions')}>
+                Auctions
+              </Link>
+              <Link href="/create-auction" className={navLinkClass('/create-auction')}>
+                Create Auction
+              </Link>
+              <Link href="/bidded-auctions" className={navLinkClass('/bidded-auctions')}>
+                Bidded Auctions
+              </Link>
+              <Link href="/profile" className={navLinkClass('/profile')}>
+                Profile
+              </Link>
             </>
           ) : (
             <>
               <Link href="/sign-in">
-                <Button className="bg-emerald-800 hover:cursor-pointer text-base p-2 sm:p-4 hover:scale-105 hover:shadow-lg transition-transform duration-200" >Login</Button>
+                <Button className="bg-emerald-800 hover:cursor-pointer text-base p-2 sm:p-4 hover:scale-105 hover:shadow-lg transition-transform duration-200">
+                  Login
+                </Button>
               </Link>
               <Link href="/sign-up">
-                <Button className="text-emerald-600 hover:cursor-pointer border-white hover:bg-gray-300 hover:text-emerald-800 hover:scale-105 hover:shadow-md transition-all duration-200" variant='outline' >Sign-Up</Button>
+                <Button
+                  className="text-emerald-600 hover:cursor-pointer border-white hover:bg-gray-300 hover:text-emerald-800 hover:scale-105 hover:shadow-md transition-all duration-200"
+                  variant="outline"
+                >
+                  Sign-Up
+                </Button>
               </Link>
             </>
           )}
@@ -144,18 +159,52 @@ function Navbar() {
         </button>
         {session ? (
           <>
-            <Link href="/auctions" onClick={() => setIsOpen(false)} className={navLinkClass('/auctions')}>Auctions</Link>
-            <Link href="/create-auction" onClick={() => setIsOpen(false)} className={navLinkClass('/create-auction')}>Create Auction</Link>
-            <Link href="/bidded-auctions" onClick={() => setIsOpen(false)} className={navLinkClass('/bidded-auctions')}>Bidded Auctions</Link>
-            <Link href="/profile" onClick={() => setIsOpen(false)} className={navLinkClass('/profile')}>Profile</Link>
+            <Link
+              href="/auctions"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass('/auctions')}
+            >
+              Auctions
+            </Link>
+            <Link
+              href="/create-auction"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass('/create-auction')}
+            >
+              Create Auction
+            </Link>
+            <Link
+              href="/bidded-auctions"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass('/bidded-auctions')}
+            >
+              Bidded Auctions
+            </Link>
+            <Link
+              href="/profile"
+              onClick={() => setIsOpen(false)}
+              className={navLinkClass('/profile')}
+            >
+              Profile
+            </Link>
           </>
         ) : (
           <>
             <Link href="/sign-in" onClick={() => setIsOpen(false)}>
-              <Button className="bg-slate-100 hover:cursor-pointer w-full text-emerald-600" variant="outline">Login</Button>
+              <Button
+                className="bg-slate-100 hover:cursor-pointer w-full text-emerald-600"
+                variant="outline"
+              >
+                Login
+              </Button>
             </Link>
             <Link href="/sign-up" onClick={() => setIsOpen(false)}>
-              <Button className="bg-slate-100 hover:cursor-pointer w-full text-emerald-600" variant="outline">Sign-Up</Button>
+              <Button
+                className="bg-slate-100 hover:cursor-pointer w-full text-emerald-600"
+                variant="outline"
+              >
+                Sign-Up
+              </Button>
             </Link>
           </>
         )}

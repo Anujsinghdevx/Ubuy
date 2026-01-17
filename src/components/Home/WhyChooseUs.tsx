@@ -17,9 +17,17 @@ type WhyChooseUsProps = {
 };
 
 const DEFAULT_REASONS: ReasonItem[] = [
-  { title: 'Secure Payments',   desc: 'Your transactions are safe and encrypted.',         Icon: ShieldCheckIcon },
-  { title: 'Verified Sellers',  desc: 'We onboard only trusted and quality sellers.',      Icon: UserIcon },
-  { title: '24/7 Support',      desc: 'Our team is always here to assist you.',            Icon: HammerIcon },
+  {
+    title: 'Secure Payments',
+    desc: 'Your transactions are safe and encrypted.',
+    Icon: ShieldCheckIcon,
+  },
+  {
+    title: 'Verified Sellers',
+    desc: 'We onboard only trusted and quality sellers.',
+    Icon: UserIcon,
+  },
+  { title: '24/7 Support', desc: 'Our team is always here to assist you.', Icon: HammerIcon },
 ];
 
 export default function WhyChooseUs({
@@ -57,7 +65,9 @@ export default function WhyChooseUs({
               <motion.span
                 aria-hidden="true"
                 animate={reduceMotion ? {} : { y: [0, -2, 0] }}
-                transition={reduceMotion ? {} : { repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
+                transition={
+                  reduceMotion ? {} : { repeat: Infinity, duration: 2.2, ease: 'easeInOut' }
+                }
                 className="inline-flex items-center justify-center"
               >
                 <Icon className="w-10 h-10 mx-auto text-emerald-600" />

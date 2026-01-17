@@ -21,22 +21,19 @@ type Item = {
 const HOW_IT_WORKS: Item[] = [
   {
     title: 'Account Registration',
-    desc:
-      'Sign up with your secure details — all information is encrypted and confidential.',
+    desc: 'Sign up with your secure details — all information is encrypted and confidential.',
     Icon: UserIcon,
     accent: 'text-emerald-600',
   },
   {
     title: 'Data Protection',
-    desc:
-      'We securely store your personal and transactional data using advanced encryption.',
+    desc: 'We securely store your personal and transactional data using advanced encryption.',
     Icon: LockIcon,
     accent: 'text-emerald-600',
   },
   {
     title: 'Privacy Assurance',
-    desc:
-      'Your data is never shared without consent and is used only for improving our services.',
+    desc: 'Your data is never shared without consent and is used only for improving our services.',
     Icon: ShieldCheckIcon,
     accent: 'text-emerald-600',
   },
@@ -45,22 +42,19 @@ const HOW_IT_WORKS: Item[] = [
 const PRINCIPLES: Item[] = [
   {
     title: 'Data Collection',
-    desc:
-      'We collect minimal, essential data needed to provide you a seamless auction experience, including your name, email, contact details, and bidding history.',
+    desc: 'We collect minimal, essential data needed to provide you a seamless auction experience, including your name, email, contact details, and bidding history.',
     Icon: FileTextIcon,
     accent: 'text-blue-600',
   },
   {
     title: 'No Unauthorised Sharing',
-    desc:
-      'We do not sell, trade, or rent your personal information to third parties without your explicit consent, except where legally required.',
+    desc: 'We do not sell, trade, or rent your personal information to third parties without your explicit consent, except where legally required.',
     Icon: AlertTriangleIcon,
     accent: 'text-red-600',
   },
   {
     title: 'Secure Storage',
-    desc:
-      'All sensitive data is encrypted and stored with strict access controls to prevent unauthorized access or misuse.',
+    desc: 'All sensitive data is encrypted and stored with strict access controls to prevent unauthorized access or misuse.',
     Icon: LockIcon,
     accent: 'text-purple-600',
   },
@@ -86,7 +80,8 @@ export default function Page() {
           Privacy Policy
         </h1>
         <p className="text-base sm:text-lg text-gray-600 mt-4 max-w-2xl mx-auto">
-          Your privacy is important to us. This page outlines how TechSaviour collects, uses, and protects your data.
+          Your privacy is important to us. This page outlines how TechSaviour collects, uses, and
+          protects your data.
         </p>
       </motion.header>
 

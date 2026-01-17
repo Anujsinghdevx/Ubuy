@@ -10,8 +10,8 @@ type CategoryItem = { title: string; icon: string; href?: string };
 const DEFAULT_CATEGORIES: CategoryItem[] = [
   { title: 'Electronics', icon: '/Electronics.png' },
   { title: 'Collectibles', icon: '/Collectibles.png' },
-  { title: 'Art',         icon: '/Art.png' },
-  { title: 'Fashion',     icon: '/Fashion.png' },
+  { title: 'Art', icon: '/Art.png' },
+  { title: 'Fashion', icon: '/Fashion.png' },
 ];
 
 type CategoriesProps = {

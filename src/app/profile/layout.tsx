@@ -1,13 +1,12 @@
-'use client'
+'use client';
 
-import ProfileSidebar from "@/components/ProfileSidebar";
+import ProfileSidebar from '@/components/ProfileSidebar';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}

@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
-import nodemailer from "nodemailer";
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
+import nodemailer from 'nodemailer';
 
 export async function POST(req: Request) {
   await dbConnect();
@@ -25,9 +25,7 @@ export async function POST(req: Request) {
       );
     }
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 400 });
+      return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -40,21 +38,21 @@ export async function POST(req: Request) {
       verificationCodeExpiry: expiry,
       isVerified: false,
     });
-    
+
     await newUser.save();
 
     const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-            user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD,
-          },
-        });
-        await transporter.sendMail({
-          from: `"U-Buy Support" <${process.env.SMTP_EMAIL}>`,
-          to: email,
-          subject: "Welcome to U-Buy – Verify Your Account",
-          html: `
+      service: 'gmail',
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+    await transporter.sendMail({
+      from: `"U-Buy Support" <${process.env.SMTP_EMAIL}>`,
+      to: email,
+      subject: 'Welcome to U-Buy – Verify Your Account',
+      html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px;">
               <h2 style="color: #0070f3;">Welcome to U-Buy!</h2>
               <p>Hi there,</p>
@@ -67,18 +65,11 @@ export async function POST(req: Request) {
               <p>Happy bidding!<br/>— The U-Buy Team</p>
             </div>
           `,
-        });
-        
+    });
 
-    return NextResponse.json(
-      { message: "User registered successfully" },
-      { status: 201 }
-    );
+    return NextResponse.json({ message: 'User registered successfully' }, { status: 201 });
   } catch (error) {
-    console.error("Error during sign-up:", error);
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
+    console.error('Error during sign-up:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

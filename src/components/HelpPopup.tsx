@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef, useLayoutEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { HelpCircle, X } from "lucide-react";
-import faqData from "@/app/data/faqData";
+import { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { HelpCircle, X } from 'lucide-react';
+import faqData from '@/app/data/faqData';
 
 type FaqCategory = keyof typeof faqData;
-type Step = "category" | "question" | "reset";
+type Step = 'category' | 'question' | 'reset';
 
 type Message = {
   id: string;
-  type: "bot" | "user";
+  type: 'bot' | 'user';
   text: string;
   category?: FaqCategory;
   questionIndex?: number;
@@ -18,7 +18,7 @@ type Message = {
 
 // Small helper to generate IDs
 const uid = () =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
@@ -32,16 +32,20 @@ export default function HelpChatBot() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<FaqCategory | null>(null);
-  const [currentStep, setCurrentStep] = useState<Step>("category");
+  const [currentStep, setCurrentStep] = useState<Step>('category');
 
   const initConversation = useCallback(() => {
-    const initial: Message[] = [{ id: uid(), type: "bot", text: "Hi! 👋 What do you need help with?" }];
+    const initial: Message[] = [
+      { id: uid(), type: 'bot', text: 'Hi! 👋 What do you need help with?' },
+    ];
     setMessages(initial);
-    setCurrentStep("category");
+    setCurrentStep('category');
     setSelectedCategory(null);
     try {
-      localStorage.setItem("helpChatMessages", JSON.stringify(initial));
-    } catch { /* ignore quota/SSR errors */ }
+      localStorage.setItem('helpChatMessages', JSON.stringify(initial));
+    } catch {
+      /* ignore quota/SSR errors */
+    }
   }, []);
 
   useEffect(() => {
@@ -54,10 +58,9 @@ export default function HelpChatBot() {
     }
   }, [open, initConversation]);
 
-
   useEffect(() => {
     try {
-      localStorage.setItem("helpChatMessages", JSON.stringify(messages));
+      localStorage.setItem('helpChatMessages', JSON.stringify(messages));
     } catch {
       // ignore quota/SSR errors
     }
@@ -66,18 +69,18 @@ export default function HelpChatBot() {
   useLayoutEffect(() => {
     chatScrollRef.current?.scrollTo({
       top: chatScrollRef.current.scrollHeight,
-      behavior: "smooth",
+      behavior: 'smooth',
     });
   }, [messages.length]);
 
   const handleCategorySelect = (category: FaqCategory) => {
     setMessages((m) => [
       ...m,
-      { id: uid(), type: "user", text: category },
-      { id: uid(), type: "bot", text: `Great! Here are some common questions about ${category}:` },
+      { id: uid(), type: 'user', text: category },
+      { id: uid(), type: 'bot', text: `Great! Here are some common questions about ${category}:` },
     ]);
     setSelectedCategory(category);
-    setCurrentStep("question");
+    setCurrentStep('question');
   };
 
   const handleQuestionClick = (question: string, answer: string, index: number) => {
@@ -85,16 +88,16 @@ export default function HelpChatBot() {
 
     setMessages((m) => [
       ...m,
-      { id: uid(), type: "user", text: question, category: selectedCategory, questionIndex: index },
-      { id: "typing", type: "bot", text: "Typing..." },
+      { id: uid(), type: 'user', text: question, category: selectedCategory, questionIndex: index },
+      { id: 'typing', type: 'bot', text: 'Typing...' },
     ]);
 
     window.setTimeout(() => {
       setMessages((m) => {
-        const withoutTyping = m.filter((x) => x.id !== "typing");
-        return [...withoutTyping, { id: uid(), type: "bot", text: answer }];
+        const withoutTyping = m.filter((x) => x.id !== 'typing');
+        return [...withoutTyping, { id: uid(), type: 'bot', text: answer }];
       });
-      setCurrentStep("reset");
+      setCurrentStep('reset');
     }, 600);
   };
 
@@ -103,7 +106,7 @@ export default function HelpChatBot() {
   };
 
   const trapFocus = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== "Tab" || !dialogRef.current) return;
+    if (e.key !== 'Tab' || !dialogRef.current) return;
     const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
       'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
     );
@@ -135,9 +138,7 @@ export default function HelpChatBot() {
           >
             <HelpCircle size={24} />
           </button>
-          <div
-            className="absolute right-26 top-6 -translate-y-1/2 translate-x-1/2 px-3 py-1 bg-emerald-600 text-white text-xs rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap"
-          >
+          <div className="absolute right-26 top-6 -translate-y-1/2 translate-x-1/2 px-3 py-1 bg-emerald-600 text-white text-xs rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
             Help Assistant
           </div>
         </div>
@@ -159,7 +160,7 @@ export default function HelpChatBot() {
             tabIndex={-1}
             ref={dialogRef}
             onKeyDown={(e) => {
-              if (e.key === "Escape") setOpen(false);
+              if (e.key === 'Escape') setOpen(false);
               trapFocus(e);
             }}
             className="bg-white rounded-xl shadow-xl p-4 w-[320px] sm:w-[90vw] max-w-md max-h-[70vh] flex flex-col overflow-hidden fixed bottom-6 right-6"
@@ -187,17 +188,18 @@ export default function HelpChatBot() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`max-w-[85%] px-3 py-2 rounded-lg text-[15px] leading-6 whitespace-pre-wrap ${msg.type === "bot"
-                    ? "bg-gray-100 text-gray-800"
-                    : "bg-emerald-600 text-white self-end ml-auto"
-                    }`}
+                  className={`max-w-[85%] px-3 py-2 rounded-lg text-[15px] leading-6 whitespace-pre-wrap ${
+                    msg.type === 'bot'
+                      ? 'bg-gray-100 text-gray-800'
+                      : 'bg-emerald-600 text-white self-end ml-auto'
+                  }`}
                 >
                   {msg.text}
                 </div>
               ))}
 
               {/* Categories */}
-              {currentStep === "category" && (
+              {currentStep === 'category' && (
                 <ul className="space-y-2 mt-2">
                   {Object.keys(faqData).map((cat) => (
                     <li key={cat}>
@@ -213,7 +215,7 @@ export default function HelpChatBot() {
               )}
 
               {/* Questions */}
-              {currentStep === "question" && selectedCategory && (
+              {currentStep === 'question' && selectedCategory && (
                 <ul className="space-y-2 mt-2">
                   {faqData[selectedCategory].map((faq, idx) => (
                     <li key={faq.q}>
@@ -228,7 +230,7 @@ export default function HelpChatBot() {
                 </ul>
               )}
 
-              {currentStep === "reset" && (
+              {currentStep === 'reset' && (
                 <button
                   onClick={handleBackClick}
                   className="mt-3 w-full rounded-md bg-emerald-600 text-white px-3 py-2 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300"

@@ -1,22 +1,21 @@
-"use client";
+'use client';
 
-import { Menu, Bell, ChevronLeft, BadgeIndianRupee, User, Heart } from "lucide-react";
-import { motion } from "framer-motion";
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Menu, Bell, ChevronLeft, BadgeIndianRupee, User, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function ProfileSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const pathname = usePathname();
 
   const menuItems = [
-    { href: "/profile", icon: User, label: "Profile" },
-    { href: "/profile/notifications", icon: Bell, label: "Notifications" },
-    { href: "/profile/my-auction", icon: BadgeIndianRupee, label: "Created Auction" },
-    { href: "/profile/wishlist", icon: Heart, label: "Wishlist" },
+    { href: '/profile', icon: User, label: 'Profile' },
+    { href: '/profile/notifications', icon: Bell, label: 'Notifications' },
+    { href: '/profile/my-auction', icon: BadgeIndianRupee, label: 'Created Auction' },
+    { href: '/profile/wishlist', icon: Heart, label: 'Wishlist' },
   ];
-
 
   return (
     <div className="flex min-h-[80vh] bg-white relative overflow-visible">
@@ -41,7 +40,7 @@ export default function ProfileSidebar() {
 
             {isCollapsed && (
               <div className="absolute left-full top-1/2 ml-2 -translate-y-1/2 px-3 py-1 bg-emerald-600 text-white text-xs rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
-                {isCollapsed ? "Expand Menu" : "Collapse Menu"}
+                {isCollapsed ? 'Expand Menu' : 'Collapse Menu'}
               </div>
             )}
           </div>
@@ -54,12 +53,15 @@ export default function ProfileSidebar() {
                 <Link
                   href={item.href}
                   className={`flex items-center justify-center sm:justify-start gap-2 w-full p-2 rounded-md transition-colors
-                  ${isActive ? "bg-emerald-300 text-emerald-800 font-semibold" : "text-gray-700 hover:text-emerald-700 hover:bg-emerald-200"}
+                  ${isActive ? 'bg-emerald-300 text-emerald-800 font-semibold' : 'text-gray-700 hover:text-emerald-700 hover:bg-emerald-200'}
         `}
                 >
                   <Icon
-                    className={`w-5 h-5 sm:w-6 sm:h-6 ${isActive ? "text-emerald-800 fill-emerald-500" : "text-gray-700 group-hover:text-emerald-700"
-                      }`}
+                    className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                      isActive
+                        ? 'text-emerald-800 fill-emerald-500'
+                        : 'text-gray-700 group-hover:text-emerald-700'
+                    }`}
                   />
                   {!isCollapsed && <span>{item.label}</span>}
                 </Link>
@@ -72,10 +74,8 @@ export default function ProfileSidebar() {
               </div>
             );
           })}
-
         </div>
       </motion.aside>
     </div>
   );
 }
-

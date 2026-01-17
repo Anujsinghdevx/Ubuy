@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export interface Session {
   user: {
@@ -38,11 +38,10 @@ export const HeroSection = ({ session }: HeroSectionProps) => {
       <div className="absolute -top-32 left-52 w-[600px] h-[600px] bg-amber-300 opacity-20 blur-3xl z-0 animate-[blob_8s_infinite]" />
 
       <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-6xl mx-auto z-10">
-       
         <motion.div
           initial={{ y: 20 }}
           animate={{ y: [20, -10, 20] }}
-          transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+          transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
           className="w-full md:w-1/2 flex justify-center md:justify-start mb-8 md:mb-0  "
         >
           <Image
@@ -65,7 +64,7 @@ export const HeroSection = ({ session }: HeroSectionProps) => {
                 animate="visible"
                 className="text-4xl md:text-5xl font-bold mb-4"
               >
-                Welcome back, {session.user.name || "Valued Bidder"}!
+                Welcome back, {session.user.name || 'Valued Bidder'}!
               </motion.h1>
               <motion.p
                 custom={1}

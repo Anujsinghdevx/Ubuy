@@ -10,10 +10,10 @@ type NotificationType = 'win' | 'bid' | 'close' | 'admin' | 'general';
 
 export type Notification = {
   _id: string;
-  type: string;           
+  type: string;
   message: string;
   isRead: boolean;
-  createdAt: string;      
+  createdAt: string;
 };
 interface NotificationDropdownProps {
   notifications: Notification[];
@@ -170,7 +170,10 @@ export default function NotificationDropdown({
 
         {/* Header (sticky on mobile) */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70">
-          <h2 id="notifications-heading" className="text-base font-semibold text-emerald-700 tracking-tight">
+          <h2
+            id="notifications-heading"
+            className="text-base font-semibold text-emerald-700 tracking-tight"
+          >
             Notifications
           </h2>
           <button
@@ -198,9 +201,10 @@ export default function NotificationDropdown({
                     role="listitem"
                     className={`
                       flex items-start gap-3 p-3 rounded-xl border transition
-                      ${n.isRead
-                        ? 'bg-white border-gray-200 hover:border-gray-300'
-                        : 'bg-emerald-50 border-emerald-100 hover:border-emerald-200'
+                      ${
+                        n.isRead
+                          ? 'bg-white border-gray-200 hover:border-gray-300'
+                          : 'bg-emerald-50 border-emerald-100 hover:border-emerald-200'
                       }
                     `}
                   >

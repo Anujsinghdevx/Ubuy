@@ -10,7 +10,7 @@ export async function GET(
 ) {
   await dbConnect();
 
-  const { id } = params;
+  const  { id } = await params;
 
   if (!isValidObjectId(id)) {
     return NextResponse.json(

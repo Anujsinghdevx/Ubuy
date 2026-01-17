@@ -1,9 +1,17 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { BadgePercent, Hammer, HammerIcon, ShieldCheck, ShieldCheckIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import { motion } from 'framer-motion';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import {
+  BadgePercent,
+  Hammer,
+  HammerIcon,
+  ShieldCheck,
+  ShieldCheckIcon,
+  TrophyIcon,
+  UsersIcon,
+} from 'lucide-react';
 import Head from 'next/head';
 
 const MotionLink = motion.create(Link);
@@ -14,21 +22,21 @@ export default function AboutPage() {
   const features = [
     {
       icon: <BadgePercent size={32} className="text-emerald-600" />,
-      title: "Best Deals",
-      desc: "Unlock incredible auction deals on premium products.",
-      color: "bg-emerald-100",
+      title: 'Best Deals',
+      desc: 'Unlock incredible auction deals on premium products.',
+      color: 'bg-emerald-100',
     },
     {
       icon: <Hammer size={32} className="text-rose-600" />,
-      title: "Live Auctions",
-      desc: "Experience real-time bidding with live price updates.",
-      color: "bg-rose-100",
+      title: 'Live Auctions',
+      desc: 'Experience real-time bidding with live price updates.',
+      color: 'bg-rose-100',
     },
     {
       icon: <ShieldCheck size={32} className="text-indigo-600" />,
-      title: "Trusted & Secure",
-      desc: "Your transactions are protected and fully transparent.",
-      color: "bg-indigo-100",
+      title: 'Trusted & Secure',
+      desc: 'Your transactions are protected and fully transparent.',
+      color: 'bg-indigo-100',
     },
   ];
 
@@ -36,9 +44,15 @@ export default function AboutPage() {
     <div className="bg-gray-50 min-h-screen pt-16 ">
       <Head>
         <title>About Ubuy | Trusted Online Auctions</title>
-        <meta name="description" content="Learn more about Ubuy's mission, secure auction features, and how to start bidding today." />
+        <meta
+          name="description"
+          content="Learn more about Ubuy's mission, secure auction features, and how to start bidding today."
+        />
         <meta property="og:title" content="About Ubuy" />
-        <meta property="og:description" content="Discover Ubuy's benefits, features, and how to win amazing deals via online auctions." />
+        <meta
+          property="og:description"
+          content="Discover Ubuy's benefits, features, and how to win amazing deals via online auctions."
+        />
         <link rel="canonical" href="https://ubuy-theta.vercel.app//about" />
       </Head>
       <motion.section
@@ -86,29 +100,29 @@ export default function AboutPage() {
           {[
             {
               icon: <UsersIcon className="text-emerald-700" size={32} />,
-              title: "Create Account",
-              desc: "Quickly sign up and dive into the action.",
+              title: 'Create Account',
+              desc: 'Quickly sign up and dive into the action.',
             },
             {
               icon: <HammerIcon className="text-emerald-700" size={32} />,
-              title: "Join Auctions",
-              desc: "Find live auctions and place your bids.",
+              title: 'Join Auctions',
+              desc: 'Find live auctions and place your bids.',
             },
             {
               icon: <TrophyIcon className="text-emerald-700" size={32} />,
-              title: "Win Big",
-              desc: "Beat the competition and secure your deals.",
+              title: 'Win Big',
+              desc: 'Beat the competition and secure your deals.',
             },
             {
               icon: <ShieldCheckIcon className="text-emerald-700" size={32} />,
-              title: "Pay Securely",
-              desc: "Complete transactions through our secure system.",
+              title: 'Pay Securely',
+              desc: 'Complete transactions through our secure system.',
             },
           ].map((step, index) => (
             <motion.div
               key={index}
               whileHover={{ y: -8, scale: 1.03 }}
-              transition={{ type: "spring", stiffness: 120 }}
+              transition={{ type: 'spring', stiffness: 120 }}
               className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col items-center text-center shadow-md"
             >
               <div className="p-3 bg-white rounded-full shadow-sm mb-4">{step.icon}</div>
@@ -136,17 +150,19 @@ export default function AboutPage() {
             className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-20 px-6 text-center"
           >
             <h2 className="text-4xl font-bold text-white mb-4">
-              Welcome Back to Ubuy, {session.user?.name || "Bidder"}!
+              Welcome Back to Ubuy, {session.user?.name || 'Bidder'}!
             </h2>
             <p className="text-lg mb-8 max-w-2xl mx-auto text-gray-200">
-              Ready to win your next great deal? Explore live auctions, outbid your rivals, and claim exclusive offers reserved for our members.
+              Ready to win your next great deal? Explore live auctions, outbid your rivals, and
+              claim exclusive offers reserved for our members.
             </p>
             <MotionLink
               href="/auctions"
               whileHover={{ scale: 1.05 }}
               className="inline-block px-8 py-4 text-emerald-600 bg-white font-semibold rounded-xl shadow-lg"
             >
-              Go to Live Auctions<span className="inline-block p-1.5 ml-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              Go to Live Auctions
+              <span className="inline-block p-1.5 ml-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
             </MotionLink>
           </motion.section>
         ) : (
@@ -159,7 +175,8 @@ export default function AboutPage() {
           >
             <h2 className="text-4xl font-bold mb-4">Start Bidding Today!</h2>
             <p className="text-lg mb-8 max-w-2xl mx-auto">
-              Join thousands of happy bidders on Ubuy — secure deals, beat competitors, and enjoy a safe auction experience.
+              Join thousands of happy bidders on Ubuy — secure deals, beat competitors, and enjoy a
+              safe auction experience.
             </p>
             <MotionLink
               href="/sign-up"
@@ -174,4 +191,3 @@ export default function AboutPage() {
     </div>
   );
 }
-

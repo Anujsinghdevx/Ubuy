@@ -14,22 +14,19 @@ type Policy = {
 const POLICIES: Policy[] = [
   {
     title: 'User Agreement',
-    desc:
-      'By using our platform, you agree to abide by our rules, respect other users, and participate in fair, legal bidding activities.',
+    desc: 'By using our platform, you agree to abide by our rules, respect other users, and participate in fair, legal bidding activities.',
     Icon: FileTextIcon,
     accentClass: 'text-blue-600',
   },
   {
     title: 'Privacy Policy',
-    desc:
-      'Your data is collected securely and used only to enhance your experience and process transactions. We never sell your information.',
+    desc: 'Your data is collected securely and used only to enhance your experience and process transactions. We never sell your information.',
     Icon: LockIcon,
     accentClass: 'text-purple-600',
   },
   {
     title: 'Prohibited Activities',
-    desc:
-      'Users are prohibited from engaging in fraud, misrepresentation, unauthorized use of accounts, or attempting to manipulate auctions.',
+    desc: 'Users are prohibited from engaging in fraud, misrepresentation, unauthorized use of accounts, or attempting to manipulate auctions.',
     Icon: AlertTriangleIcon,
     accentClass: 'text-red-600',
   },

@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import {  IndianRupee, Timer, Tag, X } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import BiddersTable from "@/components/BiddersTable";
-import { getSession } from "next-auth/react";
-import Pusher from "pusher-js";
-import AuctionDetailSkeleton from "@/components/Skeleton/AuctionDetailSkeleton";
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { IndianRupee, Timer, Tag, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Image from 'next/image';
+import BiddersTable from '@/components/BiddersTable';
+import { getSession } from 'next-auth/react';
+import Pusher from 'pusher-js';
+import AuctionDetailSkeleton from '@/components/Skeleton/AuctionDetailSkeleton';
 
 type Bidder = {
   _id: string;
@@ -51,7 +51,7 @@ export default function AuctionDetailPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState("");
+  const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -62,7 +62,7 @@ export default function AuctionDetailPage() {
       const distance = end - now;
 
       if (distance < 0) {
-        setTimeLeft("Auction ended");
+        setTimeLeft('Auction ended');
         return;
       }
 
@@ -82,21 +82,21 @@ export default function AuctionDetailPage() {
   const handleBid = async (id: string) => {
     const bidAmount = parseFloat(bidInputs[id]);
     if (isNaN(bidAmount) || bidAmount <= 0) {
-      toast.error("Please enter a valid bid amount.");
+      toast.error('Please enter a valid bid amount.');
       return;
     }
 
     try {
       const res = await fetch(`/api/auction/bid/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bidAmount }),
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Failed to place bid");
+      if (!res.ok) throw new Error(result.error || 'Failed to place bid');
 
-      toast.success("Bid placed successfully!");
+      toast.success('Bid placed successfully!');
 
       const updatedRes = await fetch(`/api/auction/${id}/details`);
       const updatedData = await updatedRes.json();
@@ -111,9 +111,9 @@ export default function AuctionDetailPage() {
         }
       }
 
-      setBidInputs({ ...bidInputs, [id]: "" });
+      setBidInputs({ ...bidInputs, [id]: '' });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(error instanceof Error ? error.message : 'Something went wrong');
     }
   };
 
@@ -142,7 +142,7 @@ export default function AuctionDetailPage() {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch auction:", err);
+        console.error('Failed to fetch auction:', err);
       }
       setLoading(false);
     }
@@ -152,11 +152,11 @@ export default function AuctionDetailPage() {
 
   useEffect(() => {
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "default-cluster",
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'default-cluster',
     });
 
     const channel = pusher.subscribe(`auction-${id}`);
-    channel.bind("new-bid", (data: Bidder) => {
+    channel.bind('new-bid', (data: Bidder) => {
       setAuction((prevAuction) => {
         if (prevAuction) {
           const updatedBidders = [...prevAuction.bidders, data];
@@ -198,11 +198,9 @@ export default function AuctionDetailPage() {
     return [500, 1000, 2000];
   };
 
-  const isClosed = auction.status === "closed";
+  const isClosed = auction.status === 'closed';
   const winner = isClosed
-    ? auction.bidders.reduce((prev, current) =>
-      prev.amount > current.amount ? prev : current
-    )
+    ? auction.bidders.reduce((prev, current) => (prev.amount > current.amount ? prev : current))
     : null;
   const isWinner = winner && winner.bidder._id.toString() === currentUserId;
 
@@ -216,16 +214,12 @@ export default function AuctionDetailPage() {
             {auction.images.map((imgUrl, idx) => (
               <div
                 key={idx}
-                className={`relative flex-shrink-0 w-20 h-20 border rounded cursor-pointer overflow-hidden ${selectedImage === imgUrl ? "ring-2 ring-emerald-500" : "border-gray-300"
-                  }`}
+                className={`relative flex-shrink-0 w-20 h-20 border rounded cursor-pointer overflow-hidden ${
+                  selectedImage === imgUrl ? 'ring-2 ring-emerald-500' : 'border-gray-300'
+                }`}
                 onClick={() => setSelectedImage(imgUrl)}
               >
-                <Image
-                  src={imgUrl}
-                  alt={`Thumbnail ${idx + 1}`}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={imgUrl} alt={`Thumbnail ${idx + 1}`} fill className="object-cover" />
               </div>
             ))}
           </div>
@@ -254,7 +248,7 @@ export default function AuctionDetailPage() {
 
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
-              <Tag className="text-purple-500" /> Category:{" "}
+              <Tag className="text-purple-500" /> Category:{' '}
               <span className="font-medium text-gray-600">{auction.category}</span>
             </div>
             <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
@@ -286,14 +280,12 @@ export default function AuctionDetailPage() {
                 )}
                 <div>
                   <p className="text-sm text-gray-600">Created by</p>
-                  <p className="text-lg font-bold text-emerald-600 uppercase">
-                    {creatorData.name}
-                  </p>
+                  <p className="text-lg font-bold text-emerald-600 uppercase">{creatorData.name}</p>
                 </div>
               </div>
               <Button
                 variant="outline"
-                onClick={() => window.location.href = `/public-profile/${creatorData._id}`}
+                onClick={() => (window.location.href = `/public-profile/${creatorData._id}`)}
                 className="rounded-full px-4 py-2"
               >
                 View Public Profile
@@ -307,10 +299,8 @@ export default function AuctionDetailPage() {
                 type="number"
                 placeholder="Your Bid (₹)"
                 className="border border-gray-300 focus:border-emerald-500 px-4 py-3 rounded-lg text-base"
-                value={bidInputs[auction._id] || ""}
-                onChange={(e) =>
-                  setBidInputs({ ...bidInputs, [auction._id]: e.target.value })
-                }
+                value={bidInputs[auction._id] || ''}
+                onChange={(e) => setBidInputs({ ...bidInputs, [auction._id]: e.target.value })}
               />
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <Button
@@ -377,10 +367,7 @@ export default function AuctionDetailPage() {
           className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
           onClick={() => setZoomedImage(null)}
         >
-          <div
-            className="relative max-w-3xl w-full px-4"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative max-w-3xl w-full px-4" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setZoomedImage(null)}
               className="absolute cursor-pointer z-50 top-4 sm:top-0 sm:right-0 right-4 text-white bg-black bg-opacity-60 rounded-full p-2 hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black transition"
@@ -388,19 +375,11 @@ export default function AuctionDetailPage() {
               <X className=" w-6 h-6 z-50" />
             </button>
             <div className="relative w-full h-[80vh]">
-              <Image
-                src={zoomedImage}
-                alt="Zoomed"
-                fill
-                className="object-contain"
-              />
+              <Image src={zoomedImage} alt="Zoomed" fill className="object-contain" />
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
-
-

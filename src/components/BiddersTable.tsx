@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface Bidder {
   _id: string;
@@ -45,15 +45,13 @@ export default function BiddersTable({ bidders }: { bidders: Bidder[] }) {
               >
                 <td className="p-2 font-medium text-gray-800 flex items-center ">
                   {index === 0 && <span title="Top Bid"></span>}
-                  {bid.bidderName || "Anonymous"}
+                  {bid.bidderName || 'Anonymous'}
                 </td>
-                <td className="p-2 text-green-600 font-semibold text-right">
-                  ₹{bid.amount}
-                </td>
+                <td className="p-2 text-green-600 font-semibold text-right">₹{bid.amount}</td>
                 <td className="p-2 text-gray-500 text-right">
-                  {new Date(bid.bidTime).toLocaleString("en-IN", {
-                    dateStyle: "short",
-                    timeStyle: "short",
+                  {new Date(bid.bidTime).toLocaleString('en-IN', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
                   })}
                 </td>
               </motion.tr>

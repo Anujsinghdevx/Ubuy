@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import AuctionCard from "@/components/AuctionCard";
-import Filters from "@/components/Filters";
-import FilterDrawer from "@/components/FilterDrawer";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import AuctionCardSkeleton from "./Skeleton/AuctionCardSkeleton";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import AuctionCard from '@/components/AuctionCard';
+import Filters from '@/components/Filters';
+import FilterDrawer from '@/components/FilterDrawer';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import AuctionCardSkeleton from './Skeleton/AuctionCardSkeleton';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -16,7 +16,7 @@ interface Auction {
   _id: string;
   title: string;
   description: string;
-  status: "active" | "closed";
+  status: 'active' | 'closed';
   category: string;
   currentPrice: number;
   images: string[];
@@ -32,13 +32,13 @@ const CategoryAuctionsPage: React.FC<CategoryAuctionsProps> = ({ category }) => 
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "closed">("all");
-  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'closed'>('all');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const [priceRange, setPriceRange] = useState(0);
-  const [quickPriceFilter, setQuickPriceFilter] = useState("");
+  const [quickPriceFilter, setQuickPriceFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [, setSortOption] = useState("endingSoon");
+  const [, setSortOption] = useState('endingSoon');
 
   const lastFetchedCategoryRef = useRef<string | null>(null);
 
@@ -66,16 +66,17 @@ const CategoryAuctionsPage: React.FC<CategoryAuctionsProps> = ({ category }) => 
           try {
             const body = await res.json();
             if (body?.error) msg = body.error;
-          } catch { }
+          } catch {}
           throw new Error(msg);
         }
 
         const data = await res.json();
         setAuctions(Array.isArray(data) ? data : (data?.data ?? []));
       } catch (err: unknown) {
-        if (typeof err === "object" && err !== null && "name" in err && (err).name === "AbortError") return;
-        console.error("Error fetching category auctions", err);
-        toast.error((err as Error)?.message || "Failed to load auctions for this category.");
+        if (typeof err === 'object' && err !== null && 'name' in err && err.name === 'AbortError')
+          return;
+        console.error('Error fetching category auctions', err);
+        toast.error((err as Error)?.message || 'Failed to load auctions for this category.');
         setAuctions([]);
       } finally {
         setLoading(false);
@@ -95,16 +96,16 @@ const CategoryAuctionsPage: React.FC<CategoryAuctionsProps> = ({ category }) => 
     return auctions
       .filter((a) =>
         q
-          ? (a.title?.toLowerCase() || "").includes(q) ||
-          (a.description?.toLowerCase() || "").includes(q)
+          ? (a.title?.toLowerCase() || '').includes(q) ||
+            (a.description?.toLowerCase() || '').includes(q)
           : true
       )
-      .filter((a) => (statusFilter === "all" ? true : a.status === statusFilter))
-      .filter((a) => (categoryFilter === "All" ? true : a.category === categoryFilter))
+      .filter((a) => (statusFilter === 'all' ? true : a.status === statusFilter))
+      .filter((a) => (categoryFilter === 'All' ? true : a.category === categoryFilter))
       .filter((a) => {
-        if (quickPriceFilter === "under500") return a.currentPrice <= 500;
-        if (quickPriceFilter === "500to1000") return a.currentPrice > 500 && a.currentPrice <= 1000;
-        if (quickPriceFilter === "above1000") return a.currentPrice > 1000;
+        if (quickPriceFilter === 'under500') return a.currentPrice <= 500;
+        if (quickPriceFilter === '500to1000') return a.currentPrice > 500 && a.currentPrice <= 1000;
+        if (quickPriceFilter === 'above1000') return a.currentPrice > 1000;
         return priceRange === 0 ? true : a.currentPrice <= priceRange;
       });
   }, [auctions, search, statusFilter, categoryFilter, priceRange, quickPriceFilter]);
@@ -116,8 +117,7 @@ const CategoryAuctionsPage: React.FC<CategoryAuctionsProps> = ({ category }) => 
     return filteredAuctions.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredAuctions, currentPage]);
 
-  const setStatusFilterAsString = (v: string) =>
-    setStatusFilter(v as "all" | "active" | "closed");
+  const setStatusFilterAsString = (v: string) => setStatusFilter(v as 'all' | 'active' | 'closed');
 
   const setCategoryFilterAsString = (v: string) => setCategoryFilter(v);
   const setPriceRangeAsNumber = (n: number) => setPriceRange(n);

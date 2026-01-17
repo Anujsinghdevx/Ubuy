@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useRef, useState } from "react";
-import Image from "next/image";
-import { UploadCloud, CheckCircle, XCircle, Info } from "lucide-react";
+import { useRef, useState } from 'react';
+import Image from 'next/image';
+import { UploadCloud, CheckCircle, XCircle, Info } from 'lucide-react';
 
 interface AuctionImageUploaderProps {
   onUpload: (imageUrls: string[]) => void;
@@ -17,17 +17,17 @@ const AuctionImageUploader: React.FC<AuctionImageUploaderProps> = ({ onUpload })
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const UPLOADIMG = process.env.NEXT_PUBLIC_UPLOAD_API || "/api/upload";
+  const UPLOADIMG = process.env.NEXT_PUBLIC_UPLOAD_API || '/api/upload';
 
   const validateFile = (file: File) => {
-    const validTypes = ["image/jpeg", "image/png"];
+    const validTypes = ['image/jpeg', 'image/png'];
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (!validTypes.includes(file.type)) {
-      setError("Invalid file type. Only JPG and PNG allowed.");
+      setError('Invalid file type. Only JPG and PNG allowed.');
       return false;
     }
     if (file.size > maxSize) {
-      setError("File too large. Maximum size is 5MB per image.");
+      setError('File too large. Maximum size is 5MB per image.');
       return false;
     }
     return true;
@@ -49,7 +49,7 @@ const AuctionImageUploader: React.FC<AuctionImageUploaderProps> = ({ onUpload })
     const validFiles = files.filter(validateFile);
 
     if (validFiles.length + images.length > 5) {
-      setError("You can upload up to 5 images total.");
+      setError('You can upload up to 5 images total.');
       return;
     }
 
@@ -66,10 +66,10 @@ const AuctionImageUploader: React.FC<AuctionImageUploaderProps> = ({ onUpload })
     setError(null);
 
     const formData = new FormData();
-    filesToUpload.forEach((file) => formData.append("files", file));
+    filesToUpload.forEach((file) => formData.append('files', file));
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", UPLOADIMG, true);
+    xhr.open('POST', UPLOADIMG, true);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
@@ -87,16 +87,16 @@ const AuctionImageUploader: React.FC<AuctionImageUploaderProps> = ({ onUpload })
           setUploadedUrls((prev) => [...prev, ...response.urls]);
           setProgress(0);
         } else {
-          setError("Unexpected server response.");
+          setError('Unexpected server response.');
         }
       } else {
-        setError("Upload failed: " + xhr.responseText);
+        setError('Upload failed: ' + xhr.responseText);
       }
     };
 
     xhr.onerror = () => {
       setUploading(false);
-      setError("An error occurred during the upload.");
+      setError('An error occurred during the upload.');
     };
 
     xhr.send(formData);
@@ -113,7 +113,7 @@ const AuctionImageUploader: React.FC<AuctionImageUploaderProps> = ({ onUpload })
         className="border-2 border-dashed p-6 rounded-lg bg-gray-50 mb-4 flex flex-col items-center justify-center hover:bg-gray-100 transition cursor-pointer"
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()} 
+        onClick={() => fileInputRef.current?.click()}
       >
         <UploadCloud className="w-10 h-10 text-gray-500 mb-2" />
         <p className="text-sm sm:text-base text-center text-gray-600 font-medium">
@@ -132,7 +132,10 @@ const AuctionImageUploader: React.FC<AuctionImageUploaderProps> = ({ onUpload })
       {previews.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-4">
           {previews.map((src, idx) => (
-            <div key={idx} className="relative w-full h-24 sm:h-60 rounded-lg overflow-hidden bg-gray-100 border">
+            <div
+              key={idx}
+              className="relative w-full h-24 sm:h-60 rounded-lg overflow-hidden bg-gray-100 border"
+            >
               <Image
                 src={src}
                 alt={`Preview ${idx + 1}`}

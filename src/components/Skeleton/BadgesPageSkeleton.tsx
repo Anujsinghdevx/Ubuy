@@ -1,6 +1,6 @@
-import { MedalIcon, Hammer, Trophy, Gavel } from "lucide-react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { MedalIcon, Hammer, Trophy, Gavel } from 'lucide-react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 
 export default function BadgesPageSkeleton() {
   const renderSkeletonSection = (Icon: React.ElementType, title: string) => (
@@ -45,9 +45,9 @@ export default function BadgesPageSkeleton() {
         </CardHeader>
 
         <CardContent>
-          {renderSkeletonSection(Hammer, "Auction Creation Badges")}
-          {renderSkeletonSection(Trophy, "Auction Win Badges")}
-          {renderSkeletonSection(Gavel, "Bidding Badges")}
+          {renderSkeletonSection(Hammer, 'Auction Creation Badges')}
+          {renderSkeletonSection(Trophy, 'Auction Win Badges')}
+          {renderSkeletonSection(Gavel, 'Bidding Badges')}
         </CardContent>
       </Card>
     </main>

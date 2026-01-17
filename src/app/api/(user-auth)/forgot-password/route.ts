@@ -1,7 +1,7 @@
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
-import { z } from "zod";
-import nodemailer from "nodemailer";
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
+import { z } from 'zod';
+import nodemailer from 'nodemailer';
 
 const ForgotPasswordSchema = z.object({
   email: z.string().email(),
@@ -15,10 +15,7 @@ export async function POST(req: Request) {
     const result = ForgotPasswordSchema.safeParse(body);
 
     if (!result.success) {
-      return Response.json(
-        { success: false, message: "Invalid email format" },
-        { status: 400 }
-      );
+      return Response.json({ success: false, message: 'Invalid email format' }, { status: 400 });
     }
 
     const { email } = result.data;
@@ -26,7 +23,7 @@ export async function POST(req: Request) {
 
     if (!user) {
       return Response.json(
-        { success: false, message: "No user found with that email" },
+        { success: false, message: 'No user found with that email' },
         { status: 404 }
       );
     }
@@ -41,7 +38,7 @@ export async function POST(req: Request) {
 
     // Send email
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: 'gmail',
       auth: {
         user: process.env.SMTP_EMAIL,
         pass: process.env.SMTP_PASSWORD,
@@ -51,7 +48,7 @@ export async function POST(req: Request) {
     await transporter.sendMail({
       from: `"U-Buy Support" <${process.env.SMTP_EMAIL}>`,
       to: email,
-      subject: "Your Password Reset Code",
+      subject: 'Your Password Reset Code',
       html: `
         <p>Hello,</p>
         <p>You requested to reset your password. Use the code below to reset it:</p>
@@ -61,15 +58,9 @@ export async function POST(req: Request) {
       `,
     });
 
-    return Response.json(
-      { success: true, message: "Reset code sent to email" },
-      { status: 200 }
-    );
+    return Response.json({ success: true, message: 'Reset code sent to email' }, { status: 200 });
   } catch (error) {
-    console.error("Forgot password error:", error);
-    return Response.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    console.error('Forgot password error:', error);
+    return Response.json({ success: false, message: 'Internal server error' }, { status: 500 });
   }
 }

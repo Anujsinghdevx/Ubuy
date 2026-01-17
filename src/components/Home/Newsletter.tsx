@@ -76,7 +76,10 @@ export default function Newsletter({
           whileTap={reduceMotion ? {} : { scale: 0.98 }}
           className="shrink-0"
         >
-          <Button type="submit" className="bg-white hover:cursor-pointer text-emerald-700 hover:bg-emerald-100">
+          <Button
+            type="submit"
+            className="bg-white hover:cursor-pointer text-emerald-700 hover:bg-emerald-100"
+          >
             Subscribe
           </Button>
         </motion.div>

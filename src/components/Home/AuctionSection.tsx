@@ -8,7 +8,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import AuctionCard from '@/components/AuctionCard';
 import AuctionCardSkeleton from '../Skeleton/AuctionCardSkeleton';
-import { Auction } from '@/hooks/useAuctions';
+import { Auction } from '@/features/auctions/types';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -32,10 +32,7 @@ export const AuctionSection = ({
 }: AuctionSectionProps) => {
   const reduceMotion = useReducedMotion();
 
-  const activeAuctions = useMemo(
-    () => auctions.filter((a) => a.status !== 'closed'),
-    [auctions]
-  );
+  const activeAuctions = useMemo(() => auctions.filter((a) => a.status !== 'closed'), [auctions]);
 
   return (
     <section

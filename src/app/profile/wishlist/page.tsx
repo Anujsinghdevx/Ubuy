@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import Image from "next/image";
-import Link from "next/link";
-import { getRemainingTime } from "@/utils/time";
-import AuctionCardSkeleton from "@/components/Skeleton/AuctionCardSkeleton";
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import Image from 'next/image';
+import Link from 'next/link';
+import { getRemainingTime } from '@/utils/time';
+import AuctionCardSkeleton from '@/components/Skeleton/AuctionCardSkeleton';
 
 interface Auction {
   _id: string;
@@ -31,29 +31,31 @@ export default function WishlistPage() {
   const fetchWishlist = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/auction/wishlist/fetch");
+      const res = await fetch('/api/auction/wishlist/fetch');
       const data = await res.json();
       if (res.ok) {
         interface WishlistItem {
           auction: Auction;
         }
-        const auctions = (data.wishlist as WishlistItem[]).map((item: WishlistItem): Auction => ({
-          _id: item.auction._id,
-          title: item.auction.title,
-          description: item.auction.description,
-          images: item.auction.images,
-          currentPrice: item.auction.currentPrice,
-          category: item.auction.category,
-          startingPrice: item.auction.startingPrice,
-          endTime: item.auction.endTime,
-        }));
+        const auctions = (data.wishlist as WishlistItem[]).map(
+          (item: WishlistItem): Auction => ({
+            _id: item.auction._id,
+            title: item.auction.title,
+            description: item.auction.description,
+            images: item.auction.images,
+            currentPrice: item.auction.currentPrice,
+            category: item.auction.category,
+            startingPrice: item.auction.startingPrice,
+            endTime: item.auction.endTime,
+          })
+        );
         setWishlist(auctions);
       } else {
-        toast.error(data.error || "Failed to fetch wishlist");
+        toast.error(data.error || 'Failed to fetch wishlist');
       }
     } catch (err) {
-      console.error("Error fetching wishlist", err);
-      toast.error("Something went wrong");
+      console.error('Error fetching wishlist', err);
+      toast.error('Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -78,19 +80,19 @@ export default function WishlistPage() {
 
   const handleRemove = async (auctionId: string) => {
     try {
-      const res = await fetch("/api/wishlist", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auctionId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to remove");
+      if (!res.ok) throw new Error(data.error || 'Failed to remove');
 
       setWishlist((prev) => prev.filter((a) => a._id !== auctionId));
-      toast.success(data.message || "Removed from wishlist");
+      toast.success(data.message || 'Removed from wishlist');
     } catch (err) {
-      console.error("Error removing from wishlist", err);
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      console.error('Error removing from wishlist', err);
+      toast.error(err instanceof Error ? err.message : 'Something went wrong');
     }
   };
 
@@ -126,7 +128,7 @@ export default function WishlistPage() {
               >
                 {/* Time Badge - top right */}
                 <div className="absolute top-3 right-3 bg-emerald-500 text-white text-sm font-semibold px-3 py-1 rounded-full z-10 shadow">
-                  {remainingTimes[auction._id] || "Calculating..."}
+                  {remainingTimes[auction._id] || 'Calculating...'}
                 </div>
 
                 <CardContent className="p-6 space-y-2 sm:space-y-4">
@@ -146,9 +148,15 @@ export default function WishlistPage() {
                   )}
 
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p><strong>Starting Price:</strong> ₹{auction.startingPrice}</p>
-                    <p><strong>Current Price:</strong> ₹{auction.currentPrice}</p>
-                    <p><strong>Category:</strong> {auction.category}</p>
+                    <p>
+                      <strong>Starting Price:</strong> ₹{auction.startingPrice}
+                    </p>
+                    <p>
+                      <strong>Current Price:</strong> ₹{auction.currentPrice}
+                    </p>
+                    <p>
+                      <strong>Category:</strong> {auction.category}
+                    </p>
                   </div>
 
                   <div className="pt-2 space-y-2">
@@ -191,5 +199,3 @@ export default function WishlistPage() {
     </div>
   );
 }
-
-

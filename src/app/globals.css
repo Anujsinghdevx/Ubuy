@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -128,5 +128,3 @@
     border-radius: 60% 40% 30% 70% / 60% 30% 40% 50%;
   }
 }
-
-

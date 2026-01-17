@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUser extends Document {
   username: string;
@@ -25,7 +25,7 @@ const UserSchema: Schema = new Schema(
       type: String,
       required: true,
       unique: true,
-      match: [/.+\@.+\..+/, "Please use a valid email address"],
+      match: [/.+\@.+\..+/, 'Please use a valid email address'],
     },
 
     password: {
@@ -45,7 +45,7 @@ const UserSchema: Schema = new Schema(
 
     verificationcode: {
       type: String,
-      default: "",
+      default: '',
     },
 
     verificationCodeExpiry: {
@@ -55,7 +55,7 @@ const UserSchema: Schema = new Schema(
 
     authProvider: {
       type: String,
-      default: "User",
+      default: 'User',
     },
 
     biddedauction: {
@@ -65,10 +65,10 @@ const UserSchema: Schema = new Schema(
 
     image: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

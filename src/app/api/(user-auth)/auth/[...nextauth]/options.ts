@@ -6,14 +6,13 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import AuthUser from '@/models/AuthUser';
 
-
-declare module "next-auth" {
+declare module 'next-auth' {
   interface User {
-    authProvider?: string; 
+    authProvider?: string;
   }
 
   interface Session {
-    user: User & { 
+    user: User & {
       authProvider?: string;
     };
   }
@@ -28,7 +27,7 @@ export const authOptions: NextAuthOptions = {
         identifier: { label: 'Email or Username', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      //@ts-expect-error : Ignoring type error here 
+      //@ts-expect-error : Ignoring type error here
       async authorize(credentials) {
         await dbConnect();
 
@@ -38,10 +37,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const user = await User.findOne({
-            $or: [
-              { email: credentials.identifier },
-              { username: credentials.identifier },
-            ],
+            $or: [{ email: credentials.identifier }, { username: credentials.identifier }],
           });
 
           if (!user) {
@@ -54,10 +50,7 @@ export const authOptions: NextAuthOptions = {
           }
 
           // Compare password
-          const isPasswordCorrect = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
+          const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
 
           if (isPasswordCorrect) {
             // If password matches, return user object
@@ -66,7 +59,7 @@ export const authOptions: NextAuthOptions = {
               username: user.username,
               email: user.email,
               isVerified: user.isVerified,
-              authProvider: 'User', 
+              authProvider: 'User',
             };
           } else {
             throw new Error('Incorrect password');
@@ -116,7 +109,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user?._id || user?.id;
         token.username = user.username;
-        token.authProvider = user.authProvider; 
+        token.authProvider = user.authProvider;
       }
       return token;
     },
@@ -125,7 +118,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string;
         session.user.username = token.username;
-        session.user.authProvider = token.authProvider as string; 
+        session.user.authProvider = token.authProvider as string;
       }
       return session;
     },
@@ -145,4 +138,3 @@ export const authOptions: NextAuthOptions = {
     signIn: '/sign-in',
   },
 };
-

@@ -11,15 +11,11 @@ export async function POST(request: Request) {
     const user = await User.findOne({ username: decodedUsername });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, message: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
     }
 
     const isCodeValid = user.verificationcode === code;
     const isCodeNotExpired = new Date(user.verificationCodeExpiry).getTime() > new Date().getTime();
-
 
     if (isCodeValid && isCodeNotExpired) {
       user.isVerified = true;
@@ -33,8 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            'Verification code has expired. Please sign up again to get a new code.',
+          message: 'Verification code has expired. Please sign up again to get a new code.',
         },
         { status: 400 }
       );
@@ -46,9 +41,6 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error('Error verifying user:', error);
-    return NextResponse.json(
-      { success: false, message: 'Error verifying user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Error verifying user' }, { status: 500 });
   }
 }

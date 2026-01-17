@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Trash2Icon } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState, useCallback } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Trash2Icon } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -15,10 +15,10 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-import Image from "next/image";
-import Link from "next/link";
-import AuctionCardSkeleton from "@/components/Skeleton/AuctionCardSkeleton";
+} from '@/components/ui/alert-dialog';
+import Image from 'next/image';
+import Link from 'next/link';
+import AuctionCardSkeleton from '@/components/Skeleton/AuctionCardSkeleton';
 
 interface Auction {
   _id: string;
@@ -30,7 +30,7 @@ interface Auction {
   highestBidder?: string;
   startTime: string;
   endTime: string;
-  status: "active" | "closed";
+  status: 'active' | 'closed';
   createdBy: string;
 }
 
@@ -44,18 +44,18 @@ const MyAuctionsPage = () => {
 
   const fetchAuctions = useCallback(async () => {
     try {
-      const res = await fetch("/api/auction/myauction");
+      const res = await fetch('/api/auction/myauction');
       const data = await res.json();
 
       if (Array.isArray(data)) {
         setAuctions(data);
       } else {
-        toast.error(data.error || "Failed to fetch auctions");
+        toast.error(data.error || 'Failed to fetch auctions');
         setAuctions([]);
       }
     } catch (err) {
-      console.error("Error fetching auctions", err);
-      toast.error("Something went wrong while fetching auctions.");
+      console.error('Error fetching auctions', err);
+      toast.error('Something went wrong while fetching auctions.');
       setAuctions([]);
     } finally {
       setLoading(false);
@@ -64,19 +64,19 @@ const MyAuctionsPage = () => {
 
   const handleCloseAuction = async (auctionId: string) => {
     try {
-      const res = await fetch("/api/auction/close", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auction/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auctionId }),
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to close auction");
+      if (!res.ok) throw new Error(result.message || 'Failed to close auction');
 
-      toast.success("Auction closed successfully!");
+      toast.success('Auction closed successfully!');
       fetchAuctions();
     } catch {
-      toast.error("Something went wrong");
+      toast.error('Something went wrong');
     }
   };
 
@@ -84,20 +84,20 @@ const MyAuctionsPage = () => {
     if (!deleteId) return;
 
     try {
-      const res = await fetch("/api/auction/delete", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auction/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auctionId: deleteId }),
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to delete auction");
+      if (!res.ok) throw new Error(result.message || 'Failed to delete auction');
 
-      toast.success("Auction deleted successfully!");
+      toast.success('Auction deleted successfully!');
       setDeleteId(null);
       fetchAuctions();
     } catch {
-      toast.error("Something went wrong");
+      toast.error('Something went wrong');
     }
   };
 
@@ -132,8 +132,15 @@ const MyAuctionsPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 w-full max-w-6xl">
             {currentAuctions.length === 0 ? (
               <p className="text-gray-500 text-center">
-                <span className="text-xl font-semibold text-gray-700">Looks like you don&apos;t have any auctions yet!</span><br />
-                <span>How about starting one? It&apos;s easy, fun, and you never know what amazing items might go live!</span><br />
+                <span className="text-xl font-semibold text-gray-700">
+                  Looks like you don&apos;t have any auctions yet!
+                </span>
+                <br />
+                <span>
+                  How about starting one? It&apos;s easy, fun, and you never know what amazing items
+                  might go live!
+                </span>
+                <br />
                 <Link href="/create-auction">
                   <Button className="mt-4 bg-emerald-500 text-white hover:bg-emerald-600">
                     Create Your Auction Now
@@ -153,10 +160,9 @@ const MyAuctionsPage = () => {
                         className="absolute cursor-pointer top-2 right-2 p-2 rounded-full text-red-500 hover:bg-red-100"
                         onClick={() => setDeleteId(auction._id)}
                       >
-                        
                         <Trash2Icon
                           className="inline-block  w-6 h-6 sm:w-7 sm:h-7 text-red-500 hover:text-red-600"
-                          style={{ width: "1.5rem", height: "1.5rem" }} 
+                          style={{ width: '1.5rem', height: '1.5rem' }}
                         />
                       </Button>
                     </AlertDialogTrigger>
@@ -164,7 +170,8 @@ const MyAuctionsPage = () => {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Auction?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. Are you sure you want to delete this auction?
+                          This action cannot be undone. Are you sure you want to delete this
+                          auction?
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -197,13 +204,21 @@ const MyAuctionsPage = () => {
                     </div>
 
                     <div className="text-sm text-gray-600">
-                      <p><strong>Start:</strong> {new Date(auction.startTime).toLocaleString()}</p>
-                      <p><strong>End:</strong> {new Date(auction.endTime).toLocaleString()}</p>
-                      <p><strong>Status:</strong> {auction.status}</p>
-                      <p><strong>Current Price:</strong> ₹{auction.currentPrice}</p>
+                      <p>
+                        <strong>Start:</strong> {new Date(auction.startTime).toLocaleString()}
+                      </p>
+                      <p>
+                        <strong>End:</strong> {new Date(auction.endTime).toLocaleString()}
+                      </p>
+                      <p>
+                        <strong>Status:</strong> {auction.status}
+                      </p>
+                      <p>
+                        <strong>Current Price:</strong> ₹{auction.currentPrice}
+                      </p>
                     </div>
 
-                    {auction.status === "active" && (
+                    {auction.status === 'active' && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button className="w-full mt-4 bg-red-500 text-white hover:bg-red-600">
@@ -214,7 +229,8 @@ const MyAuctionsPage = () => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Closing this auction will prevent any further bids. This action cannot be undone.
+                              Closing this auction will prevent any further bids. This action cannot
+                              be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -245,9 +261,13 @@ const MyAuctionsPage = () => {
           {/* Pagination controls */}
           {auctions.length > ITEMS_PER_PAGE && (
             <div className="flex justify-center mt-8 space-x-4">
-              <Button onClick={handlePrevPage} disabled={currentPage === 1}>Previous</Button>
+              <Button onClick={handlePrevPage} disabled={currentPage === 1}>
+                Previous
+              </Button>
               <span className="text-gray-700 font-medium">{`Page ${currentPage} of ${totalPages}`}</span>
-              <Button onClick={handleNextPage} disabled={currentPage === totalPages}>Next</Button>
+              <Button onClick={handleNextPage} disabled={currentPage === totalPages}>
+                Next
+              </Button>
             </div>
           )}
         </>

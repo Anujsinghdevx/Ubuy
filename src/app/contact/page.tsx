@@ -1,17 +1,23 @@
-"use client";
+'use client';
 
-import Head from "next/head";
-import { motion } from "framer-motion";
-import { MailIcon, PhoneIcon, MapPinIcon, SendIcon } from "lucide-react";
+import Head from 'next/head';
+import { motion } from 'framer-motion';
+import { MailIcon, PhoneIcon, MapPinIcon, SendIcon } from 'lucide-react';
 
 export default function ContactPage() {
   return (
     <>
       <Head>
         <title>Contact Us | U-Buy</title>
-        <meta name="description" content="Get in touch with U-Buy. Reach out for support, inquiries, or feedback through our contact form or contact details." />
+        <meta
+          name="description"
+          content="Get in touch with U-Buy. Reach out for support, inquiries, or feedback through our contact form or contact details."
+        />
         <meta property="og:title" content="Contact Us | U-Buy" />
-        <meta property="og:description" content="Get in touch with U-Buy. Reach out for support, inquiries, or feedback through our contact form or contact details." />
+        <meta
+          property="og:description"
+          content="Get in touch with U-Buy. Reach out for support, inquiries, or feedback through our contact form or contact details."
+        />
         <meta name="keywords" content="Contact, U-Buy, Support, Feedback, Help, Inquiry" />
       </Head>
 
@@ -40,18 +46,18 @@ export default function ContactPage() {
           {[
             {
               icon: <MailIcon className="text-emerald-600" />,
-              title: "Email",
-              value: "support@ubuy.in",
+              title: 'Email',
+              value: 'support@ubuy.in',
             },
             {
               icon: <PhoneIcon className="text-emerald-600" />,
-              title: "Phone",
-              value: "+91 98765 43210",
+              title: 'Phone',
+              value: '+91 98765 43210',
             },
             {
               icon: <MapPinIcon className="text-emerald-600" />,
-              title: "Location",
-              value: "New Delhi, India",
+              title: 'Location',
+              value: 'New Delhi, India',
             },
           ].map((item, index) => (
             <motion.div
@@ -75,7 +81,7 @@ export default function ContactPage() {
           className="space-y-6 bg-white p-8 rounded-xl shadow"
           onSubmit={(e) => {
             e.preventDefault();
-            alert("Message sent successfully!");
+            alert('Message sent successfully!');
           }}
         >
           <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">Send Us a Message</h2>

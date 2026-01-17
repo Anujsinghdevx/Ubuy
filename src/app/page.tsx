@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useSession } from "next-auth/react";
-import Head from "next/head";
-import { HeroSection } from "@/components/Home/HeroSection";
-import { AuctionSection } from "@/components/Home/AuctionSection";
-import MegaAuction from "@/components/Home/MegaAuction";
-import Categories from "@/components/Home/Categories";
-import Stats from "@/components/Home/Stats";
-import WhyChooseUs from "@/components/Home/WhyChooseUs";
-import Newsletter from "@/components/Home/Newsletter";
-import { useAuctions } from "@/hooks/useAuctions";
+import { useSession } from 'next-auth/react';
+import Head from 'next/head';
+import { HeroSection } from '@/components/Home/HeroSection';
+import { AuctionSection } from '@/components/Home/AuctionSection';
+import MegaAuction from '@/components/Home/MegaAuction';
+import Categories from '@/components/Home/Categories';
+import Stats from '@/components/Home/Stats';
+import WhyChooseUs from '@/components/Home/WhyChooseUs';
+import Newsletter from '@/components/Home/Newsletter';
+import { useAuctions } from '@/hooks/useAuctions';
 
 export default function HomePage() {
   const { data: session } = useSession();

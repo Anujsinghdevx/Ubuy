@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import AuctionCard from "@/components/AuctionCard";
-import Filters from "@/components/Filters";
-import FilterDrawer from "@/components/FilterDrawer";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import AuctionCardSkeleton from "@/components/Skeleton/AuctionCardSkeleton";
+import { useEffect, useState } from 'react';
+import AuctionCard from '@/components/AuctionCard';
+import Filters from '@/components/Filters';
+import FilterDrawer from '@/components/FilterDrawer';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import AuctionCardSkeleton from '@/components/Skeleton/AuctionCardSkeleton';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -15,7 +15,7 @@ type Auction = {
   _id: string;
   title: string;
   description: string;
-  status: "active" | "closed";
+  status: 'active' | 'closed';
   category: string;
   currentPrice: number;
   images: string[];
@@ -27,22 +27,22 @@ export default function AllAuctionsPage() {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const [priceRange, setPriceRange] = useState(0);
-  const [quickPriceFilter, setQuickPriceFilter] = useState("");
+  const [quickPriceFilter, setQuickPriceFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [, setSortOption] = useState("endingSoon");
+  const [, setSortOption] = useState('endingSoon');
 
   useEffect(() => {
     const fetchAuctions = async () => {
       try {
-        const res = await fetch("/api/auction/all");
+        const res = await fetch('/api/auction/all');
         const data = await res.json();
         setAuctions(data);
       } catch (err) {
-        console.error("Error fetching auctions", err);
+        console.error('Error fetching auctions', err);
       } finally {
         setLoading(false);
       }
@@ -51,16 +51,17 @@ export default function AllAuctionsPage() {
   }, []);
 
   const filteredAuctions = auctions
-    .filter((a) =>
-      (a.title?.toLowerCase() || "").includes(search.toLowerCase()) ||
-      (a.description?.toLowerCase() || "").includes(search.toLowerCase())
+    .filter(
+      (a) =>
+        (a.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
+        (a.description?.toLowerCase() || '').includes(search.toLowerCase())
     )
-    .filter((a) => statusFilter === "all" || a.status === statusFilter)
-    .filter((a) => categoryFilter === "All" || a.category === categoryFilter)
+    .filter((a) => statusFilter === 'all' || a.status === statusFilter)
+    .filter((a) => categoryFilter === 'All' || a.category === categoryFilter)
     .filter((a) => {
-      if (quickPriceFilter === "under500") return a.currentPrice <= 500;
-      if (quickPriceFilter === "500to1000") return a.currentPrice > 500 && a.currentPrice <= 1000;
-      if (quickPriceFilter === "above1000") return a.currentPrice > 1000;
+      if (quickPriceFilter === 'under500') return a.currentPrice <= 500;
+      if (quickPriceFilter === '500to1000') return a.currentPrice > 500 && a.currentPrice <= 1000;
+      if (quickPriceFilter === 'above1000') return a.currentPrice > 1000;
       return a.currentPrice <= priceRange || priceRange === 0;
     });
 
@@ -73,7 +74,6 @@ export default function AllAuctionsPage() {
   return (
     <div className="w-full mx-auto px-6 sm:px-12 py-10">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
         {/* Sidebar Filters (PC) */}
         <aside className="hidden lg:block p-4 space-y-4">
           <h3 className="text-lg font-semibold">Filters</h3>
@@ -139,11 +139,17 @@ export default function AllAuctionsPage() {
 
               {/* Pagination */}
               <div className="flex justify-center mt-10 space-x-4">
-                <Button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                <Button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
                   Previous
                 </Button>
                 <span className="text-gray-700">{`Page ${currentPage} of ${totalPages}`}</span>
-                <Button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
+                <Button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
                   Next
                 </Button>
               </div>

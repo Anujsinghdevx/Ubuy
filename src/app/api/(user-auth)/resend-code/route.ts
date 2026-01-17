@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
+import { NextResponse } from 'next/server';
+import dbConnect from '@/lib/dbConnect';
+import User from '@/models/User';
 
 const rateLimitMap = new Map<string, number>();
 const RATE_LIMIT_INTERVAL_MS = 60 * 1000; // 1 minute
@@ -12,13 +12,13 @@ export async function POST(req: Request) {
   const decodedUsername = decodeURIComponent(username);
 
   // === Rate limit per IP ===
-  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  const ip = req.headers.get('x-forwarded-for') || 'unknown';
   const now = Date.now();
   const lastRequestTime = rateLimitMap.get(ip) || 0;
 
   if (now - lastRequestTime < RATE_LIMIT_INTERVAL_MS) {
     return NextResponse.json(
-      { success: false, message: "Please wait before requesting again." },
+      { success: false, message: 'Please wait before requesting again.' },
       { status: 429 }
     );
   }
@@ -27,15 +27,12 @@ export async function POST(req: Request) {
     const user = await User.findOne({ username: decodedUsername });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, message: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
     }
 
     if (user.isVerified) {
       return NextResponse.json(
-        { success: false, message: "User already verified" },
+        { success: false, message: 'User already verified' },
         { status: 400 }
       );
     }
@@ -55,14 +52,11 @@ export async function POST(req: Request) {
     console.log(`Resent code for ${user.username}: ${newCode}`);
 
     return NextResponse.json(
-      { success: true, message: "Verification code resent" },
+      { success: true, message: 'Verification code resent' },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error resending code:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 }
-    );
+    console.error('Error resending code:', error);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }

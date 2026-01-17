@@ -1,9 +1,8 @@
 {
-    "functions": {
-      "src/app/api/upload.ts": {
-        "memory": 1024,
-        "maxDuration": 60
-      }
+  "functions": {
+    "src/app/api/upload.ts": {
+      "memory": 1024,
+      "maxDuration": 60
     }
   }
-  
+}
