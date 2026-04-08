@@ -2,15 +2,14 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.2.2-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)
-![MongoDB](https://img.shields.io/badge/Database-MongoDB-green.svg)
 
-**Ubuy** is a full-stack, real-time auction platform where users can bid, win, and list unique items. Featuring real-time bidding with Socket.IO, secure payments via Cashfree, and a sleek, responsive UI — Ubuy provides a modern, production-ready auction experience.
+**Ubuy** is a frontend app for a backend-driven auction platform where users can bid, win, and manage listings. It focuses on a thin Next.js UI layer, authenticated backend API calls, and a polished responsive experience.
 
 ---
 
 ## 🚀 Live Features
 
-- 🔁 **Real-Time Bidding** via Socket.IO
+- 🔁 **Real-Time Auction Updates** via backend socket events
 - 💰 **Cashfree Payment Integration**
 - 🔐 **Full Authentication** with Google and Credentials (NextAuth)
 - 🎞️ **Live Auction Carousel** (Swiper.js)
@@ -20,7 +19,7 @@
 - 📲 **Responsive Design** with microinteractions
 - 🎨 **Framer Motion Animations & Lucide Icons**
 - 📧 **Newsletter Subscription** with SMTP Email support
-- 🌩️ **Cloudinary Uploads** for auction images
+- 📡 **Backend-Driven Uploads** for auction images and profile media
 - 🧠 **Form Validation** with React Hook Form & Zod
 - 🧑‍💻 **Admin Dashboard** for auction moderation and stats
 
@@ -41,14 +40,14 @@
 | Layer    | Tools & Libraries                                  |
 | -------- | -------------------------------------------------- |
 | Frontend | Next.js 15 • TypeScript • Tailwind CSS • ShadCN UI |
-| Backend  | Node.js • Next API Routes • Socket.IO              |
-| Database | MongoDB • Mongoose ORM                             |
+| Backend  | Backend API • Next.js route handlers               |
+| Data     | Backend-owned persistence                         |
 | Auth     | NextAuth.js (Google + Credentials)                 |
-| Realtime | Pusher • Socket.IO                                 |
+| Realtime | Backend Socket.IO events via client subscription   |
 | UI/UX    | Framer Motion • Lucide Icons • Swiper.js           |
 | Forms    | React Hook Form • Zod • @hookform/resolvers        |
-| Media    | Multer • Cloudinary                                |
-| Email    | Nodemailer + SMTP                                  |
+| Media    | Backend upload API                                 |
+| Email    | Backend email flows                                |
 | CAPTCHA  | Cloudflare Turnstile (via react-turnstile)         |
 | Payments | Cashfree                                           |
 

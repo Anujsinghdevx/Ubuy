@@ -17,7 +17,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { format, setHours, setMinutes, addHours } from 'date-fns';
 import { toast } from 'sonner';
-import { z } from 'zod';
+import { createAuctionSchema } from '@/schemas/CreateAuctionSchema';
 
 const Turnstile = lazy(() => import('react-turnstile'));
 const AuctionImageUploader = lazy(() => import('@/components/AuctionImageUploader'));
@@ -41,16 +41,6 @@ const categoryIcons: Record<string, React.JSX.Element> = {
   Collectibles: <Star className="w-4 h-4 mr-2" />,
   Other: <Layers className="w-4 h-4 mr-2" />,
 };
-
-const auctionSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  startingPrice: z.coerce.number().gt(0, 'Price must be greater than zero'),
-  startTime: z.string(),
-  endTime: z.string(),
-  images: z.array(z.string()).min(1, 'At least one image is required'),
-  category: z.string(),
-});
 
 const getLocalTimeString = (date = new Date()) => {
   const hours = String(date.getHours()).padStart(2, '0');
@@ -136,7 +126,7 @@ export default function CreateAuction() {
       return;
     }
 
-    const validation = auctionSchema.safeParse({
+    const validation = createAuctionSchema.safeParse({
       ...formData,
       startingPrice: Number(formData.startingPrice),
     });

@@ -5,16 +5,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { z } from 'zod';
 import axios from 'axios';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Mail, Key } from 'lucide-react';
 import Image from 'next/image';
-
-const emailSchema = z.object({ email: z.string().email() });
-const codeSchema = z.object({ code: z.string().length(6, 'Code must be 6 digits') });
+import { forgotPasswordCodeSchema, forgotPasswordEmailSchema } from '@/schemas/ForgotPasswordSchema';
 
 export default function ForgotPasswordPage() {
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -22,16 +19,16 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
 
   const emailForm = useForm({
-    resolver: zodResolver(emailSchema),
+    resolver: zodResolver(forgotPasswordEmailSchema),
     defaultValues: { email: '' },
   });
 
   const codeForm = useForm({
-    resolver: zodResolver(codeSchema),
+    resolver: zodResolver(forgotPasswordCodeSchema),
     defaultValues: { code: '' },
   });
 
-  const handleSendCode = async (values: z.infer<typeof emailSchema>) => {
+  const handleSendCode = async (values: { email: string }) => {
     try {
       await axios.post('/api/forgot-password', { email: values.email });
       toast.success('Reset code sent');
@@ -46,7 +43,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const handleVerifyCode = async (values: z.infer<typeof codeSchema>) => {
+  const handleVerifyCode = async (values: { code: string }) => {
     try {
       await axios.post('/api/reset-code', {
         email,

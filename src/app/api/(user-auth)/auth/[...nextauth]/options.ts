@@ -170,9 +170,9 @@ export const authOptions: NextAuthOptions = {
           });
 
           const rawText = await response.text();
-          let payload: any = null;
+          let payload: Record<string, unknown> | null = null;
           try {
-            payload = rawText ? JSON.parse(rawText) : null;
+            payload = rawText ? (JSON.parse(rawText) as Record<string, unknown>) : null;
           } catch {
             // keep rawText for diagnostics
           }
@@ -187,8 +187,10 @@ export const authOptions: NextAuthOptions = {
           }
 
           const accessToken =
-            payload?.access_token || payload?.accessToken || payload?.token;
-          const backendUser = payload?.user;
+            (payload?.access_token as string | undefined) ||
+            (payload?.accessToken as string | undefined) ||
+            (payload?.token as string | undefined);
+          const backendUser = payload?.user as BackendMeUser | undefined;
 
           if (!accessToken || !backendUser) {
             console.error('[auth][google] Invalid backend payload', {

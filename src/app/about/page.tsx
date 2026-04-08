@@ -53,7 +53,7 @@ export default function AboutPage() {
           property="og:description"
           content="Discover Ubuy's benefits, features, and how to win amazing deals via online auctions."
         />
-        <link rel="canonical" href="https://ubuy-theta.vercel.app//about" />
+        <link rel="canonical" href="https://ubuy-theta.vercel.app/about" />
       </Head>
       <motion.section
         initial={{ opacity: 0, y: 30 }}

@@ -1,12 +1,13 @@
 'use client';
 
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { useState } from 'react';
+import { verifySchema } from '@/schemas/VerifySchema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,15 +21,11 @@ import {
 import { UserCheck, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 
-const verifySchema = z.object({
-  email: z.string().email('A valid email is required'),
-  code: z.string().length(6, 'Code must be 6 digits'),
-});
-
 const VerifyCodePage = () => {
   const router = useRouter();
   const params = useParams();
   const routeEmail = decodeURIComponent((params?.username as string) || '');
+  const [isResending, setIsResending] = useState(false);
   const form = useForm({
     resolver: zodResolver(verifySchema),
     defaultValues: {
@@ -44,6 +41,28 @@ const VerifyCodePage = () => {
       router.replace('/sign-in');
     } catch {
       toast.error('Verification failed');
+    }
+  };
+
+  const handleResendCode = async () => {
+    const email = form.getValues('email')?.trim();
+    if (!email) {
+      toast.error('Email is required to resend code');
+      return;
+    }
+
+    try {
+      setIsResending(true);
+      const res = await axios.post('/api/resend-code', { email });
+      toast.success(res?.data?.message || 'Verification code resent');
+    } catch (error: unknown) {
+      const message =
+        axios.isAxiosError(error)
+          ? error.response?.data?.message || error.response?.data?.error || 'Failed to resend code'
+          : 'Failed to resend code';
+      toast.error(message);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -127,6 +146,16 @@ const VerifyCodePage = () => {
               className="w-full hover:cursor-pointer bg-emerald-500 text-white py-2 text-sm rounded-md hover:bg-emerald-600"
             >
               Verify Account
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isResending}
+              onClick={handleResendCode}
+              className="w-full"
+            >
+              {isResending ? 'Resending...' : 'Resend Code'}
             </Button>
           </form>
         </Form>

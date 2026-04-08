@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { z } from 'zod';
 import axios from 'axios';
 import { Lock } from 'lucide-react';
 
@@ -19,16 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-
-const schema = z
-  .object({
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+import { resetPasswordSchema } from '@/schemas/ResetPasswordSchema';
 
 export default function ResetPasswordPage() {
   const params = useParams();
@@ -36,14 +26,14 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   const form = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: '',
       confirmPassword: '',
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof schema>) => {
+  const onSubmit = async (values: { password: string; confirmPassword: string }) => {
     try {
       await axios.post('/api/reset-password', {
         email,

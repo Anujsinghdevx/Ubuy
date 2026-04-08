@@ -10,6 +10,52 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 
+type WishlistFetchItem = {
+  auction?: {
+    _id?: string;
+  };
+  auctionId?: string;
+  _id?: string;
+};
+
+let wishlistIdCache: Set<string> | null = null;
+let wishlistIdCachePromise: Promise<Set<string> | null> | null = null;
+
+const extractWishlistId = (item: WishlistFetchItem): string | null => {
+  const candidate = item?.auction?._id || item?.auctionId || item?._id;
+  return typeof candidate === 'string' && candidate.length > 0 ? candidate : null;
+};
+
+const loadWishlistIds = async (): Promise<Set<string> | null> => {
+  if (wishlistIdCache) return wishlistIdCache;
+  if (wishlistIdCachePromise) return wishlistIdCachePromise;
+
+  wishlistIdCachePromise = (async () => {
+    try {
+      const res = await fetch('/api/auction/wishlist/fetch', { method: 'GET' });
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      const list = Array.isArray(data?.wishlist) ? (data.wishlist as WishlistFetchItem[]) : [];
+      const ids = new Set<string>();
+
+      for (const item of list) {
+        const id = extractWishlistId(item);
+        if (id) ids.add(id);
+      }
+
+      wishlistIdCache = ids;
+      return ids;
+    } catch {
+      return null;
+    } finally {
+      wishlistIdCachePromise = null;
+    }
+  })();
+
+  return wishlistIdCachePromise;
+};
+
 interface Auction {
   _id: string;
   title: string;
@@ -49,8 +95,30 @@ function formatRemaining(secs: number): string {
 export default function AuctionCard({ auction, showWishlist = true }: AuctionCardProps) {
   const [bidInput, setBidInput] = useState('');
   const [remainingSecs, setRemainingSecs] = useState(getRemainingSeconds(auction.endTime));
-  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistBusy, setWishlistBusy] = useState(false);
   const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!showWishlist || !session) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    let mounted = true;
+
+    const hydrateWishlistedState = async () => {
+      const ids = await loadWishlistIds();
+      if (!mounted || !ids) return;
+      setIsWishlisted(ids.has(auction._id));
+    };
+
+    hydrateWishlistedState();
+
+    return () => {
+      mounted = false;
+    };
+  }, [auction._id, session, showWishlist]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -82,18 +150,64 @@ export default function AuctionCard({ auction, showWishlist = true }: AuctionCar
     }
   };
 
-  const toggleWishlist = () => {
+  const toggleWishlist = async () => {
     if (!session) {
       toast('Please log in to add to wishlist.');
       return;
     }
 
-    if (wishlist.includes(auction._id)) {
-      setWishlist(wishlist.filter((id) => id !== auction._id));
-      toast('Removed from wishlist');
-    } else {
-      setWishlist([...wishlist, auction._id]);
-      toast('Added to wishlist');
+    if (wishlistBusy) return;
+
+    try {
+      setWishlistBusy(true);
+
+      if (isWishlisted) {
+        const res = await fetch('/api/auction/wishlist/delete', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ auctionId: auction._id }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error || data?.message || 'Failed to remove from wishlist');
+        }
+
+        setIsWishlisted(false);
+        if (wishlistIdCache) {
+          wishlistIdCache.delete(auction._id);
+        }
+        toast(data?.message || 'Removed from wishlist');
+        return;
+      }
+
+      const res = await fetch('/api/auction/wishlist/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auctionId: auction._id }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        const message = data?.error || data?.message || 'Failed to add to wishlist';
+        if (typeof message === 'string' && message.toLowerCase().includes('already')) {
+          setIsWishlisted(true);
+          toast('Already in wishlist');
+          return;
+        }
+        throw new Error(message);
+      }
+
+      setIsWishlisted(true);
+      if (!wishlistIdCache) {
+        wishlistIdCache = new Set<string>();
+      }
+      wishlistIdCache.add(auction._id);
+      toast(data?.message || 'Added to wishlist');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Something went wrong');
+    } finally {
+      setWishlistBusy(false);
     }
   };
 
@@ -112,8 +226,8 @@ export default function AuctionCard({ auction, showWishlist = true }: AuctionCar
         <div className="absolute top-3 left-3 z-10">
           <Heart
             onClick={toggleWishlist}
-            className="w-6 h-6 text-emerald-500 cursor-pointer hover:scale-110 transition-transform"
-            fill={wishlist.includes(auction._id) ? 'currentColor' : 'none'}
+            className={`w-6 h-6 text-emerald-500 ${wishlistBusy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:scale-110'} transition-transform`}
+            fill={isWishlisted ? 'currentColor' : 'none'}
             stroke="currentColor"
           />
         </div>
