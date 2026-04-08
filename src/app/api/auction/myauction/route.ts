@@ -1,39 +1,20 @@
-import dbConnect from '@/lib/dbConnect';
 import { NextResponse } from 'next/server';
-import Auction from '@/models/Auction';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../(user-auth)/auth/[...nextauth]/options';
-import mongoose from 'mongoose';
+import { backendJsonRequest, getBearerTokenFromSession } from '@/lib/backend-api';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+  const accessToken = getBearerTokenFromSession(session);
 
-  // ✅ Check for valid session and id
-  if (!session || !session.user?.id) {
+  if (!session || !session.user?.id || !accessToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    await dbConnect();
-
-    const userId = session.user.id;
-    const objectId = new mongoose.Types.ObjectId(userId);
-
-    // ✅ Auto-close user's expired auctions
-    const currentTime = new Date();
-    await Auction.updateMany(
-      {
-        createdBy: objectId,
-        endTime: { $lte: currentTime },
-        status: 'active',
-      },
-      { $set: { status: 'closed' } }
-    );
-
-    // ✅ Fetch user's auctions
-    const auctions = await Auction.find({ createdBy: objectId });
-
-    return NextResponse.json(auctions, { status: 200 });
+    const { status, data } = await backendJsonRequest('/v1/auctions/me/created', { method: 'GET' }, accessToken);
+    const auctions = (data as { data?: unknown[] })?.data ?? [];
+    return NextResponse.json(auctions, { status });
   } catch (error) {
     const errorMessage = (error as Error).message;
     return NextResponse.json(

@@ -48,12 +48,12 @@ export default function ForgotPasswordPage() {
 
   const handleVerifyCode = async (values: z.infer<typeof codeSchema>) => {
     try {
-      const res = await axios.post('/api/reset-code', {
+      await axios.post('/api/reset-code', {
         email,
         code: values.code,
       });
       toast.success('Code verified');
-      router.push(`/reset-password/${res.data.username}`);
+      router.push(`/reset-password/${encodeURIComponent(email)}`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || 'Invalid code');

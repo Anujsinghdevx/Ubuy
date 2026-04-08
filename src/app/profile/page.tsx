@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import {
@@ -38,11 +38,21 @@ type Stats = {
 };
 
 type Profile = {
+  userId?: string;
+  email?: string;
   image?: string;
   username?: string;
   name?: string;
+  provider?: string;
+  isVerified?: boolean;
+  biddedAuctions?: string[];
   createdAt?: string;
   stats: Stats;
+};
+
+type ProfileApiResponse = {
+  message?: string;
+  user?: Omit<Profile, 'stats'>;
 };
 
 interface StatCardProps {
@@ -59,73 +69,75 @@ export default function ProfilePage() {
   const { data: session, status, update } = useSession();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [createdAtFormatted, setCreatedAtFormatted] = useState('');
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [publicProfileUrl, setPublicProfileUrl] = useState('');
   const [showAllBadges, setShowAllBadges] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const userId = session?.user?.id;
+  const uploadApi = process.env.NEXT_PUBLIC_UPLOAD_API || '/api/upload-profile-image';
+  const publicProfilePath = userId ? `/public-profile/${userId}` : '';
+
+  const fetchProfile = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [profileRes, statsRes] = await Promise.all([fetch('/api/profile'), fetch('/api/auction/bidstats')]);
+
+      const profilePayload = (await profileRes.json()) as ProfileApiResponse | Omit<Profile, 'stats'>;
+      const statsData = await statsRes.json();
+
+      if (!profileRes.ok) {
+        const profileError = profilePayload as { error?: string };
+        throw new Error(profileError.error || 'Failed to fetch profile');
+      }
+      if (!statsRes.ok) throw new Error(statsData.error || 'Failed to fetch stats');
+
+      const userData =
+        (profilePayload as ProfileApiResponse)?.user || (profilePayload as Omit<Profile, 'stats'>);
+
+      const newProfile: Profile = {
+        ...userData,
+        stats: {
+          totalBids: statsData.totalBids ?? 0,
+          auctionsCreated: statsData.auctionsCreated ?? 0,
+          auctionsWon: statsData.auctionsWon ?? 0,
+        },
+      };
+
+      setProfile((prev) => {
+        if (JSON.stringify(prev) !== JSON.stringify(newProfile)) {
+          return newProfile;
+        }
+        return prev;
+      });
+
+      const nextName = typeof userData?.name === 'string' ? userData.name : '';
+      const nextUsername = typeof userData?.username === 'string' ? userData.username : '';
+      setName((prev) => (prev !== nextName ? nextName : prev));
+      setUsername((prev) => (prev !== nextUsername ? nextUsername : prev));
+
+      if (userData?.createdAt) {
+        const formatted = new Date(userData.createdAt).toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        });
+        setCreatedAtFormatted((prev) => (prev !== formatted ? formatted : prev));
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!session?.user?.id) return;
-
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const [profileRes, statsRes] = await Promise.all([
-          fetch('/api/profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: session.user.id,
-              userModel: session.user.authProvider === 'credentials' ? 'User' : 'AuthUser',
-            }),
-          }),
-          fetch('/api/auction/bidstats'),
-        ]);
-
-        const profileData = await profileRes.json();
-        const statsData = await statsRes.json();
-
-        if (!profileRes.ok) throw new Error(profileData.error || 'Failed to fetch profile');
-        if (!statsRes.ok) throw new Error(statsData.error || 'Failed to fetch stats');
-
-        const newProfile: Profile = {
-          ...profileData,
-          stats: {
-            totalBids: statsData.totalBids ?? 0,
-            auctionsCreated: statsData.auctionsCreated ?? 0,
-            auctionsWon: statsData.auctionsWon ?? 0,
-          },
-        };
-
-        setProfile((prev) => {
-          if (JSON.stringify(prev) !== JSON.stringify(newProfile)) {
-            return newProfile;
-          }
-          return prev;
-        });
-
-        setName((prev) => (prev !== profileData.name ? profileData.name : prev));
-
-        if (profileData.createdAt) {
-          const formatted = new Date(profileData.createdAt).toLocaleDateString('en-US', {
-            month: 'long',
-            year: 'numeric',
-          });
-          setCreatedAtFormatted((prev) => (prev !== formatted ? formatted : prev));
-        }
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
-  }, [session?.user?.id]);
+  }, [fetchProfile, session?.user?.id]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && userId) {
@@ -133,40 +145,74 @@ export default function ProfilePage() {
     }
   }, [userId]);
 
-  const toBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
+  const uploadProfileImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('files', file);
+
+    const uploadRes = await fetch(uploadApi, {
+      method: 'POST',
+      body: formData,
     });
+
+    const uploadData = await uploadRes.json();
+    if (!uploadRes.ok) {
+      throw new Error(uploadData?.error || uploadData?.message || 'Failed to upload profile image');
+    }
+
+    const imageUrl =
+      (Array.isArray(uploadData?.urls) ? uploadData.urls[0] : undefined) ||
+      uploadData?.url ||
+      uploadData?.image;
+
+    if (typeof imageUrl !== 'string' || !imageUrl) {
+      throw new Error('Upload succeeded but no image URL was returned');
+    }
+
+    return imageUrl;
+  };
 
   const handleUpdateProfile = async () => {
     if (!session?.user) return toast.error('You must be signed in.');
 
     try {
       setIsUpdating(true);
-      let imageBase64 = '';
+      const payload: { name?: string; username?: string; image?: string } = {};
+
+      const nextName = name.trim();
+      const nextUsername = username.trim();
+
+      if (nextName && nextName !== (profile?.name || '')) {
+        payload.name = nextName;
+      }
+
+      if (nextUsername && nextUsername !== (profile?.username || '')) {
+        payload.username = nextUsername;
+      }
+
+      let imageUrl: string | undefined;
       const file = fileInputRef.current?.files?.[0];
-      if (file) imageBase64 = await toBase64(file);
+      if (file) {
+        imageUrl = await uploadProfileImage(file);
+        payload.image = imageUrl;
+      }
+
+      if (!payload.name && !payload.username && !payload.image) {
+        toast.info('No profile changes detected');
+        return;
+      }
 
       const res = await fetch('/api/update-profile', {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: session.user.id,
-          userModel: session.user.authProvider === 'credentials' ? 'User' : 'AuthUser',
-          username: profile?.username,
-          name,
-          imageBase64: imageBase64 || undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Update failed');
 
       toast.success('Profile updated!');
-      await update();
+      await fetchProfile();
+      await update({ name: payload.name || session.user.name, image: payload.image || session.user.image });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -302,6 +348,31 @@ export default function ProfilePage() {
                   )}
                 </div>
 
+                <div className="flex items-center justify-center gap-2 mt-1">
+                  {!isEditingUsername ? (
+                    <>
+                      <p className="text-sm sm:text-base font-medium text-gray-600">
+                        @{username || 'username'}
+                      </p>
+                      <button
+                        onClick={() => setIsEditingUsername(true)}
+                        className="text-gray-500 cursor-pointer hover:text-emerald-600 transition-transform transform hover:scale-110 duration-300"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      onBlur={() => setIsEditingUsername(false)}
+                      autoFocus
+                      className="text-sm font-medium text-center border-b border-emerald-400 bg-transparent focus:outline-none transition-all duration-300 ease-in-out transform hover:scale-105"
+                    />
+                  )}
+                </div>
+
                 <div className="flex items-center gap-2 text-gray-600 text-sm mt-2">
                   <Mail className="w-5 h-5 text-emerald-500" />
                   <span>{session.user.email}</span>
@@ -423,13 +494,20 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <Link
-            href={`/public-profile/${userId}`}
-            target="_blank"
+          <Button
+            type="button"
+            onClick={() => {
+              if (!publicProfilePath) {
+                toast.error('Unable to open public profile right now');
+                return;
+              }
+
+              window.open(publicProfilePath, '_blank', 'noopener,noreferrer');
+            }}
             className="bg-emerald-500 text-center justify-center text-white px-6 py-1 rounded-full hover:bg-emerald-600 transition"
           >
             View Public Profile
-          </Link>
+          </Button>
           <div className="w-full px-2 overflow-x-hidden">
             <h4 className="text-lg font-semibold text-center mb-2">Share your Public Profile</h4>
 

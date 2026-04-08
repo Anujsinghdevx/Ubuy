@@ -4,8 +4,11 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import HelpPopup from '@/components/HelpPopup';
 import ClientNavbarWrapper from '@/components/ClientNavbarWrapper';
 import Providers from '@/components/Providers';
+import type { Metadata } from 'next';
+import { ReactNode } from 'react';
 
-export const metadata = {
+export const metadata: Metadata = {
+  metadataBase: new URL('https://ubuy-theta.vercel.app'),
   title: {
     default: 'U-Buy - Online Auction Platform',
     template: '%s | U-Buy',
@@ -27,8 +30,6 @@ export const metadata = {
     card: 'summary_large_image',
   },
 };
-
-import { ReactNode } from 'react';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

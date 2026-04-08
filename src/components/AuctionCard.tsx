@@ -73,7 +73,7 @@ export default function AuctionCard({ auction, showWishlist = true }: AuctionCar
         body: JSON.stringify({ bidAmount }),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Failed to place bid');
+      if (!res.ok) throw new Error(result.error || result.message || 'Failed to place bid');
 
       toast.success('Bid placed successfully!');
       setBidInput('');

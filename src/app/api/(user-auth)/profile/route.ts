@@ -1,30 +1,18 @@
-import dbConnect from '@/lib/dbConnect';
 import { NextResponse } from 'next/server';
-import User from '@/models/User';
-import AuthUser from '@/models/AuthUser';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/options';
+import { backendJsonRequest, getBearerTokenFromSession } from '@/lib/backend-api';
 
-export async function POST(req: Request) {
+const fetchAuthenticatedProfile = async () => {
   try {
-    await dbConnect();
-
-    const { userId, userModel } = await req.json();
-
-    if (!userId || !userModel) {
-      return NextResponse.json({ error: 'userId and userModel are required' }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    const accessToken = getBearerTokenFromSession(session);
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!['User', 'AuthUser'].includes(userModel)) {
-      return NextResponse.json({ error: 'Invalid user model' }, { status: 400 });
-    }
-
-    const Model = userModel === 'User' ? User : AuthUser;
-    const user = await Model.findById(userId).select('-password');
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    return NextResponse.json(user, { status: 200 });
+    const { status, data } = await backendJsonRequest('/v1/auth/me', { method: 'GET' }, accessToken);
+    return NextResponse.json(data, { status });
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return NextResponse.json(
@@ -32,4 +20,12 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+};
+
+export async function GET() {
+  return fetchAuthenticatedProfile();
+}
+
+export async function POST() {
+  return fetchAuthenticatedProfile();
 }

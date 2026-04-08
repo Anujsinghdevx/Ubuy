@@ -72,7 +72,7 @@ const Page = () => {
     try {
       await axios.post('/api/sign-up', data);
       toast.success('Account created successfully');
-      router.replace(`/verify/${data.username}`);
+      router.replace(`/verify/${encodeURIComponent(data.email)}`);
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {

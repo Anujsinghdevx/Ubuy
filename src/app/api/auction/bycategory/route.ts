@@ -1,13 +1,8 @@
-import dbConnect from '@/lib/dbConnect';
 import { NextResponse } from 'next/server';
-import Auction from '@/models/Auction';
-import '@/models/User';
-import '@/models/AuthUser';
+import { backendJsonRequest } from '@/lib/backend-api';
 
 export async function GET(request: Request) {
   try {
-    await dbConnect();
-
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
 
@@ -15,22 +10,19 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Missing category parameter' }, { status: 400 });
     }
 
-    // Fetch auctions for the specified category
-    const auctions = await Auction.find({ category }).sort({ endTime: -1 });
-
-    // Populate the createdBy and bidders.bidder fields
-    await Auction.populate(auctions, [
+    const { status, data } = await backendJsonRequest(
+      `/v1/auctions?category=${encodeURIComponent(category)}`,
       {
-        path: 'createdBy',
-        select: 'username email provider',
-      },
-      {
-        path: 'bidders.bidder',
-        select: 'username email provider',
-      },
-    ]);
+        method: 'GET',
+      }
+    );
+    const auctions = Array.isArray(data)
+      ? data
+      : ((data as { data?: unknown[]; auctions?: unknown[] })?.data ??
+        (data as { data?: unknown[]; auctions?: unknown[] })?.auctions ??
+        []);
 
-    return NextResponse.json(auctions, { status: 200 });
+    return NextResponse.json(auctions, { status });
   } catch (error) {
     const errorMessage = (error as Error).message;
     return NextResponse.json(

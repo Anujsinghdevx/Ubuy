@@ -75,20 +75,18 @@ const Page = () => {
           {/* Form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Email/Username */}
+              {/* Email */}
               <FormField
                 name="identifier"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-800">
-                      Email or Username
-                    </FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-800">Email</FormLabel>
                     <FormControl>
                       <div className="flex items-center relative">
                         <Mail className="absolute left-3 text-gray-400" size={20} />
                         <Input
-                          placeholder="Enter your email/username"
+                          placeholder="Enter your email"
                           className="pl-10 border border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                           {...field}
                         />

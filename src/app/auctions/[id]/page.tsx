@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
 import BiddersTable from '@/components/BiddersTable';
-import { getSession } from 'next-auth/react';
-import Pusher from 'pusher-js';
+import { useSession } from 'next-auth/react';
 import AuctionDetailSkeleton from '@/components/Skeleton/AuctionDetailSkeleton';
+import { useAuctionSocket } from '@/hooks/useAuctionSocket';
 
 type Bidder = {
   _id: string;
@@ -32,6 +32,7 @@ type Auction = {
   status: string;
   bidders: Bidder[];
   createdBy: string; // only the ID
+  paymentStatus?: string;
 };
 
 type Creator = {
@@ -40,9 +41,35 @@ type Creator = {
   image?: string;
 };
 
+const normalizeCreator = (raw: unknown): Creator | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const record = raw as Record<string, unknown>;
+  const id = String(record._id ?? record.id ?? '');
+  const name = String(record.name ?? record.username ?? '').trim();
+  const image =
+    typeof record.image === 'string'
+      ? record.image
+      : typeof record.profileImage === 'string'
+        ? record.profileImage
+        : undefined;
+
+  if (!id) return null;
+  return {
+    _id: id,
+    name: name || 'User',
+    image,
+  };
+};
+
+const toRecord = (value: unknown): Record<string, unknown> | null => {
+  if (!value || typeof value !== 'object') return null;
+  return value as Record<string, unknown>;
+};
+
 export default function AuctionDetailPage() {
   const params = useParams();
   const id = params?.id as string | undefined;
+  const { data: session } = useSession();
 
   const [auction, setAuction] = useState<Auction | null>(null);
   const [creatorData, setCreatorData] = useState<Creator | null>(null);
@@ -52,6 +79,121 @@ export default function AuctionDetailPage() {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState('');
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+
+  const socketToken = session?.accessToken || session?.user?.accessToken || null;
+
+  useAuctionSocket({
+    auctionId: id,
+    token: socketToken,
+    onNewBid: (data) => {
+      const bidderRecord = toRecord(data.bidder);
+      setAuction((prevAuction) => {
+        if (!prevAuction) return prevAuction;
+
+        const amount = typeof data.amount === 'number' ? data.amount : Number(data.amount);
+        const bidTime =
+          typeof data.bidTime === 'string' ? data.bidTime : new Date().toISOString();
+        const bidderName =
+          typeof data.bidderName === 'string'
+            ? data.bidderName
+            : typeof bidderRecord?.name === 'string'
+              ? bidderRecord.name
+              : 'Anonymous';
+        const bidderId =
+          typeof bidderRecord?._id === 'string'
+            ? bidderRecord._id
+            : typeof data.bidderId === 'string'
+              ? data.bidderId
+              : '';
+
+        const newBid = {
+          _id: String(data._id || `${Date.now()}`),
+          bidderName,
+          amount: Number.isFinite(amount) ? amount : prevAuction.currentPrice,
+          bidTime,
+          bidder: { _id: String(bidderId) },
+        };
+
+        return {
+          ...prevAuction,
+          currentPrice: newBid.amount,
+          bidders: [...prevAuction.bidders, newBid],
+        };
+      });
+    },
+    onNotificationNew: (data) => {
+      const message =
+        typeof data.message === 'string' ? data.message : 'You have a new notification.';
+      toast(message);
+    },
+    onOutBid: (data) => {
+      const amount = typeof data.amount === 'number' ? data.amount : Number(data.amount);
+      setAuction((prevAuction) =>
+        prevAuction
+          ? {
+              ...prevAuction,
+              currentPrice: Number.isFinite(amount) ? amount : prevAuction.currentPrice,
+            }
+          : prevAuction
+      );
+      toast.error(
+        typeof data.message === 'string' ? data.message : 'You have been outbid.'
+      );
+    },
+    onAuctionEnded: () => {
+      setAuction((prevAuction) =>
+        prevAuction
+          ? {
+              ...prevAuction,
+              status: 'closed',
+            }
+          : prevAuction
+      );
+      toast('Auction ended.');
+    },
+    onAuctionWinnerChanged: (data) => {
+      setAuction((prevAuction) =>
+        prevAuction
+          ? {
+              ...prevAuction,
+              status: 'closed',
+              currentPrice:
+                typeof data.currentPrice === 'number'
+                  ? data.currentPrice
+                  : prevAuction.currentPrice,
+            }
+          : prevAuction
+      );
+      toast('Auction winner updated.');
+    },
+    onPaymentConfirmed: () => {
+      setAuction((prevAuction) =>
+        prevAuction
+          ? {
+              ...prevAuction,
+              paymentStatus: 'PAID',
+            }
+          : prevAuction
+      );
+      toast.success('Payment confirmed.');
+    },
+    onAuctionCancelled: () => {
+      setAuction((prevAuction) =>
+        prevAuction
+          ? {
+              ...prevAuction,
+              status: 'closed',
+            }
+          : prevAuction
+      );
+      toast.error('Auction cancelled.');
+    },
+    onAuctionDeleted: () => {
+      toast.error('Auction deleted.');
+      window.location.href = '/auctions';
+    },
+  });
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -94,7 +236,7 @@ export default function AuctionDetailPage() {
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Failed to place bid');
+      if (!res.ok) throw new Error(result.error || result.message || 'Failed to place bid');
 
       toast.success('Bid placed successfully!');
 
@@ -105,9 +247,9 @@ export default function AuctionDetailPage() {
 
         // fetch creator info
         if (updatedData.auction.createdBy) {
-          const creatorRes = await fetch(`/api/public/${updatedData.auction.createdBy}`);
+          const creatorRes = await fetch(`/api/auction/public/${updatedData.auction.createdBy}`);
           const creatorJson = await creatorRes.json();
-          if (creatorJson.success) setCreatorData(creatorJson.user);
+          if (creatorJson.success) setCreatorData(normalizeCreator(creatorJson.user));
         }
       }
 
@@ -117,13 +259,54 @@ export default function AuctionDetailPage() {
     }
   };
 
+  const handlePayHere = async () => {
+    if (!auction?._id) return;
+
+    try {
+      setPaymentProcessing(true);
+      toast.loading('Generating payment link...', { id: 'payment' });
+
+      const returnUrl = `${window.location.origin}/payments/status?auctionId=${encodeURIComponent(
+        auction._id
+      )}`;
+      const notifyUrl = process.env.NEXT_PUBLIC_PAYMENT_NOTIFY_URL;
+
+      const res = await fetch('/api/auction/payment-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auctionId: auction._id,
+          customerPhone: '9999999999',
+          returnUrl,
+          ...(notifyUrl ? { notifyUrl } : {}),
+          sendSms: true,
+          sendEmail: true,
+        }),
+      });
+
+      const data = (await res.json()) as { payment_link?: string; error?: string };
+      toast.dismiss('payment');
+
+      if (res.ok && data.payment_link) {
+        toast.success('Redirecting...');
+        window.location.href = data.payment_link;
+      } else {
+        toast.error(data.error || 'Failed to generate payment link.');
+      }
+    } catch (error) {
+      toast.dismiss('payment');
+      toast.error(error instanceof Error ? error.message : 'Something went wrong');
+    } finally {
+      setPaymentProcessing(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchSession() {
-      const session = await getSession();
-      if (session && session.user) setCurrentUserId(session.user.id);
+      if (session?.user) setCurrentUserId(session.user.id);
     }
     fetchSession();
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     async function fetchAuction() {
@@ -138,7 +321,7 @@ export default function AuctionDetailPage() {
           if (data.auction.createdBy) {
             const creatorRes = await fetch(`/api/auction/public/${data.auction.createdBy}`);
             const creatorJson = await creatorRes.json();
-            if (creatorJson.success) setCreatorData(creatorJson.user);
+            if (creatorJson.success) setCreatorData(normalizeCreator(creatorJson.user));
           }
         }
       } catch (err) {
@@ -148,33 +331,6 @@ export default function AuctionDetailPage() {
     }
 
     if (id) fetchAuction();
-  }, [id]);
-
-  useEffect(() => {
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'default-cluster',
-    });
-
-    const channel = pusher.subscribe(`auction-${id}`);
-    channel.bind('new-bid', (data: Bidder) => {
-      setAuction((prevAuction) => {
-        if (prevAuction) {
-          const updatedBidders = [...prevAuction.bidders, data];
-          return {
-            ...prevAuction,
-            currentPrice: data.amount,
-            bidders: updatedBidders,
-          };
-        }
-        return prevAuction;
-      });
-    });
-
-    return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
-      pusher.disconnect();
-    };
   }, [id]);
 
   useEffect(() => {
@@ -198,11 +354,18 @@ export default function AuctionDetailPage() {
     return [500, 1000, 2000];
   };
 
-  const isClosed = auction.status === 'closed';
-  const winner = isClosed
+  const isClosed =
+    auction.status === 'closed' || new Date(auction.endTime).getTime() <= Date.now();
+  const winner = isClosed && auction.bidders.length > 0
     ? auction.bidders.reduce((prev, current) => (prev.amount > current.amount ? prev : current))
     : null;
   const isWinner = winner && winner.bidder._id.toString() === currentUserId;
+  const canShowPayButton =
+    Boolean(isWinner) &&
+    auction.paymentStatus !== 'PAID' &&
+    auction.paymentStatus !== 'completed';
+  const isPaymentCompleted =
+    auction.paymentStatus === 'PAID' || auction.paymentStatus === 'completed';
 
   return (
     <div className="mx-auto p-4 sm:p-6 lg:px-16 lg:py-8">
@@ -275,7 +438,7 @@ export default function AuctionDetailPage() {
                   />
                 ) : (
                   <div className="w-14 h-14 rounded-full bg-emerald-400 text-white flex items-center justify-center font-bold text-lg">
-                    {creatorData.name[0]}
+                    {(creatorData.name?.[0] || 'U').toUpperCase()}
                   </div>
                 )}
                 <div>
@@ -285,7 +448,11 @@ export default function AuctionDetailPage() {
               </div>
               <Button
                 variant="outline"
-                onClick={() => (window.location.href = `/public-profile/${creatorData._id}`)}
+                onClick={() => {
+                  const profilePath = creatorData?._id ? `/public-profile/${creatorData._id}` : '';
+                  if (!profilePath) return;
+                  window.open(profilePath, '_blank', 'noopener,noreferrer');
+                }}
                 className="rounded-full px-4 py-2"
               >
                 View Public Profile
@@ -341,9 +508,25 @@ export default function AuctionDetailPage() {
           {isClosed && winner && (
             <div className="border-t border-gray-300 mt-6 py-4">
               {isWinner ? (
-                <p className="text-green-600 text-base sm:text-lg font-semibold text-center mt-4">
-                  You have won the auction! Congratulations!
-                </p>
+                <div className="flex flex-col items-center gap-3 mt-4">
+                  <p className="text-green-600 text-base sm:text-lg font-semibold text-center">
+                    You have won the auction! Congratulations!
+                  </p>
+                  {isPaymentCompleted && (
+                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700 border border-emerald-300">
+                      Payment completed
+                    </span>
+                  )}
+                  {canShowPayButton && (
+                    <Button
+                      className="bg-purple-600 text-white hover:bg-purple-700"
+                      disabled={paymentProcessing}
+                      onClick={handlePayHere}
+                    >
+                      {paymentProcessing ? 'Redirecting...' : 'Pay Here'}
+                    </Button>
+                  )}
+                </div>
               ) : (
                 <p className="text-base sm:text-lg font-semibold text-center">
                   The auction has ended. The winner is <strong>{winner.bidderName}</strong>.

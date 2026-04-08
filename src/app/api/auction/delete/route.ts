@@ -1,39 +1,27 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../(user-auth)/auth/[...nextauth]/options';
-import dbConnect from '@/lib/dbConnect';
-import Auction from '@/models/Auction';
-import mongoose from 'mongoose';
+import { backendJsonRequest, getBearerTokenFromSession } from '@/lib/backend-api';
 
 export async function DELETE(request: Request) {
   const session = await getServerSession(authOptions);
+  const accessToken = getBearerTokenFromSession(session);
 
-  if (!session || !session.user?.id) {
+  if (!session || !session.user?.id || !accessToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    await dbConnect();
-
     const { auctionId } = await request.json();
+    const { status, data } = await backendJsonRequest(
+      `/v1/auctions/${encodeURIComponent(auctionId)}/cancel`,
+      {
+        method: 'POST',
+      },
+      accessToken
+    );
 
-    if (!auctionId || !mongoose.Types.ObjectId.isValid(auctionId)) {
-      return NextResponse.json({ error: 'Invalid auction ID' }, { status: 400 });
-    }
-
-    const objectId = new mongoose.Types.ObjectId(session.user.id);
-
-    // ✅ Check if the auction belongs to the logged-in user
-    const auction = await Auction.findOne({ _id: auctionId, createdBy: objectId });
-
-    if (!auction) {
-      return NextResponse.json({ error: 'No auction found for this user' }, { status: 404 });
-    }
-
-    // ✅ Delete the auction
-    await Auction.deleteOne({ _id: auctionId });
-
-    return NextResponse.json({ message: 'Auction deleted successfully!' }, { status: 200 });
+    return NextResponse.json(data, { status });
   } catch (error) {
     const errorMessage = (error as Error).message;
     return NextResponse.json(

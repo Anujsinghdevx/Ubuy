@@ -10,11 +10,16 @@ interface Bidder {
   bidderName: string;
 }
 
-export default function BiddersTable({ bidders }: { bidders: Bidder[] }) {
+type BiddersTableProps = {
+  bidders?: Bidder[] | null;
+};
+
+export default function BiddersTable({ bidders }: BiddersTableProps) {
   const [sortedBidders, setSortedBidders] = useState<Bidder[]>([]);
 
   useEffect(() => {
-    const sorted = [...bidders].sort((a, b) => {
+    const safeBidders = Array.isArray(bidders) ? bidders : [];
+    const sorted = [...safeBidders].sort((a, b) => {
       if (b.amount === a.amount) {
         return new Date(b.bidTime).getTime() - new Date(a.bidTime).getTime();
       }

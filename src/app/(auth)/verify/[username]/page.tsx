@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -20,21 +21,23 @@ import { UserCheck, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 
 const verifySchema = z.object({
-  username: z.string().min(1, 'Username is required'),
+  email: z.string().email('A valid email is required'),
   code: z.string().length(6, 'Code must be 6 digits'),
 });
 
 const VerifyCodePage = () => {
   const router = useRouter();
+  const params = useParams();
+  const routeEmail = decodeURIComponent((params?.username as string) || '');
   const form = useForm({
     resolver: zodResolver(verifySchema),
     defaultValues: {
-      username: '',
+      email: routeEmail,
       code: '',
     },
   });
 
-  const onSubmit = async (values: { username: string; code: string }) => {
+  const onSubmit = async (values: { email: string; code: string }) => {
     try {
       await axios.post('/api/verify-code', values);
       toast.success('Verification successful! You can now log in.');
@@ -67,11 +70,11 @@ const VerifyCodePage = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Username */}
             <FormField
-              name="username"
+              name="email"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-800">Username</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-800">Email</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <UserCheck
@@ -79,7 +82,7 @@ const VerifyCodePage = () => {
                         size={20}
                       />
                       <Input
-                        placeholder="Your username"
+                        placeholder="Your email"
                         className="pl-10 border border-gray-300 placeholder:text-gray-400 px-4 py-2 text-sm"
                         {...field}
                       />

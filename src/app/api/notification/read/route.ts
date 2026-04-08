@@ -1,41 +1,24 @@
 import { getServerSession } from 'next-auth';
-import dbConnect from '@/lib/dbConnect';
-import Notification from '@/models/Notification';
-import User from '@/models/User';
-import AuthUser from '@/models/AuthUser';
 import { NextResponse } from 'next/server';
 import { authOptions } from '../../(user-auth)/auth/[...nextauth]/options';
+import { backendJsonRequest, getBearerTokenFromSession } from '@/lib/backend-api';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
+  const accessToken = getBearerTokenFromSession(session);
 
-  if (!session || !session.user?.id) {
+  if (!session || !session.user?.id || !accessToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  await dbConnect();
-
   try {
-    const isAuthUser = session.user.authProvider === 'AuthUser';
-    const UserModel = isAuthUser ? AuthUser : User;
-
-    const user = await UserModel.findById(session.user.id);
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Mark all unread notifications as read
-    const result = await Notification.updateMany(
-      {
-        recipient: session.user.id,
-        recipientModel: isAuthUser ? 'AuthUser' : 'User',
-        isRead: false,
-      },
-      { $set: { isRead: true } }
+    const { status, data } = await backendJsonRequest(
+      '/v1/notifications/read-all',
+      { method: 'PATCH' },
+      accessToken
     );
 
-    // Return success response
-    return NextResponse.json({ message: 'Notifications marked as read', result }, { status: 200 });
+    return NextResponse.json(data, { status });
   } catch (error) {
     console.error('Error marking notifications:', error);
     return NextResponse.json(

@@ -80,7 +80,7 @@ export default function WishlistPage() {
 
   const handleRemove = async (auctionId: string) => {
     try {
-      const res = await fetch('/api/wishlist', {
+      const res = await fetch('/api/auction/wishlist/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ auctionId }),

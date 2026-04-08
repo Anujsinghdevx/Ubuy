@@ -32,7 +32,7 @@ const schema = z
 
 export default function ResetPasswordPage() {
   const params = useParams();
-  const username = params?.username as string | undefined;
+  const email = decodeURIComponent((params?.username as string | undefined) || '');
   const router = useRouter();
 
   const form = useForm({
@@ -46,7 +46,7 @@ export default function ResetPasswordPage() {
   const onSubmit = async (values: z.infer<typeof schema>) => {
     try {
       await axios.post('/api/reset-password', {
-        username,
+        email,
         password: values.password,
       });
       toast.success('Password reset successfully');

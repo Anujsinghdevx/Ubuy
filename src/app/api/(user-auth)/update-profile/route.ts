@@ -1,48 +1,27 @@
-import dbConnect from '@/lib/dbConnect';
 import { NextResponse } from 'next/server';
-import User from '@/models/User';
-import AuthUser from '@/models/AuthUser';
-import cloudinary from '@/utils/cloudinary';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/options';
+import { backendJsonRequest, getBearerTokenFromSession } from '@/lib/backend-api';
 
-export async function PUT(req: Request) {
+const updateProfile = async (req: Request) => {
   try {
-    await dbConnect();
-
-    const { userId, userModel, username, imageBase64 } = await req.json();
-
-    if (!userId || !userModel) {
-      return NextResponse.json({ error: 'userId and userModel are required' }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    const accessToken = getBearerTokenFromSession(session);
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!['User', 'AuthUser'].includes(userModel)) {
-      return NextResponse.json({ error: 'Invalid user model' }, { status: 400 });
-    }
+    const body = await req.json();
+    const { status, data } = await backendJsonRequest(
+      '/v1/auth/update-profile',
+      {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      },
+      accessToken
+    );
 
-    const updateFields: Partial<{ username: string; image: string }> = {};
-
-    if (username) updateFields.username = username;
-
-    // Upload the image to Cloudinary if provided
-    if (imageBase64) {
-      const uploadResponse = await cloudinary.uploader.upload(imageBase64, {
-        folder: 'user-profiles',
-      });
-      updateFields.image = uploadResponse.secure_url;
-    }
-
-    const Model = userModel === 'User' ? User : AuthUser;
-
-    const updatedUser = await Model.findByIdAndUpdate(
-      userId,
-      { $set: updateFields },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    if (!updatedUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    return NextResponse.json(updatedUser, { status: 200 });
+    return NextResponse.json(data, { status });
   } catch (error) {
     console.error('Error updating user profile:', error);
     return NextResponse.json(
@@ -50,4 +29,12 @@ export async function PUT(req: Request) {
       { status: 500 }
     );
   }
+};
+
+export async function PATCH(req: Request) {
+  return updateProfile(req);
+}
+
+export async function PUT(req: Request) {
+  return updateProfile(req);
 }

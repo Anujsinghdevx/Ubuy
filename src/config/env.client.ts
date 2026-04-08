@@ -6,6 +6,8 @@ const clientSchema = z.object({
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string(),
   NEXT_PUBLIC_UPLOAD_API: z.string().optional(),
   NEXT_PUBLIC_API_BASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SOCKET_URL: z.string().url().optional(),
+  NEXT_PUBLIC_PAYMENT_NOTIFY_URL: z.string().url().optional(),
 });
 
 const parsed = clientSchema.safeParse({
@@ -14,6 +16,8 @@ const parsed = clientSchema.safeParse({
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
   NEXT_PUBLIC_UPLOAD_API: process.env.NEXT_PUBLIC_UPLOAD_API,
   NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
+  NEXT_PUBLIC_PAYMENT_NOTIFY_URL: process.env.NEXT_PUBLIC_PAYMENT_NOTIFY_URL,
 });
 
 if (!parsed.success) {

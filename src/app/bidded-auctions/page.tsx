@@ -20,13 +20,15 @@ interface Auction {
   images: string[];
   startingPrice: number;
   currentPrice: number;
-  highestBidder?: string;
   startTime: string;
   category: string;
   endTime: string;
   status: 'active' | 'closed';
   createdBy: string;
   winnerId?: string;
+  highestBidder?: string | { _id?: string; id?: string };
+  winner?: string | { _id?: string; id?: string };
+  paymentStatus?: 'PAID' | 'ACTIVE' | 'pending' | 'completed' | 'failed';
 }
 
 interface PaymentLinkResponse {
@@ -35,6 +37,24 @@ interface PaymentLinkResponse {
 }
 
 const ITEMS_PER_PAGE = 9;
+
+const getIdValue = (value: unknown): string | null => {
+  if (!value) return null;
+  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    if (typeof record._id === 'string' || typeof record._id === 'number') {
+      return String(record._id);
+    }
+    if (typeof record.id === 'string' || typeof record.id === 'number') {
+      return String(record.id);
+    }
+  }
+  return null;
+};
+
+const getWinnerId = (auction: Auction): string | null =>
+  getIdValue(auction.winnerId) || getIdValue(auction.winner) || getIdValue(auction.highestBidder);
 
 export default function BiddedAuctionsPage() {
   const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -80,10 +100,22 @@ export default function BiddedAuctionsPage() {
       setProcessing(auctionId);
       toast.loading('Generating payment link...', { id: 'payment' });
 
-      const res = await fetch('/api/auction/notify-payment', {
+      const returnUrl = `${window.location.origin}/payments/status?auctionId=${encodeURIComponent(
+        auctionId
+      )}`;
+      const notifyUrl = process.env.NEXT_PUBLIC_PAYMENT_NOTIFY_URL;
+
+      const res = await fetch('/api/auction/payment-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ auctionId }),
+        body: JSON.stringify({
+          auctionId,
+          customerPhone: '9999999999',
+          returnUrl,
+          ...(notifyUrl ? { notifyUrl } : {}),
+          sendSms: true,
+          sendEmail: true,
+        }),
       });
 
       const data: PaymentLinkResponse = await res.json();
@@ -193,6 +225,14 @@ export default function BiddedAuctionsPage() {
                       className="relative min-w-80 bg-white/10 border border-emerald-400/40 shadow-lg rounded-2xl overflow-hidden"
                     >
                       <CardContent className="p-6 space-y-4">
+                        {(auction.status === 'closed' || new Date(auction.endTime).getTime() <= Date.now()) &&
+                          getWinnerId(auction) === myUserId &&
+                          (auction.paymentStatus === 'PAID' || auction.paymentStatus === 'completed') && (
+                          <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-300">
+                            Payment completed
+                          </span>
+                        )}
+
                         <h2 className="text-xl font-bold text-gray-900">{auction.title}</h2>
                         <p className="text-gray-700">{auction.description}</p>
 
@@ -232,7 +272,10 @@ export default function BiddedAuctionsPage() {
                           View Auction Details
                         </Button>
 
-                        {auction.status === 'closed' && auction.winnerId === myUserId && (
+                        {(auction.status === 'closed' || new Date(auction.endTime).getTime() <= Date.now()) &&
+                          getWinnerId(auction) === myUserId &&
+                          auction.paymentStatus !== 'PAID' &&
+                          auction.paymentStatus !== 'completed' && (
                           <Button
                             className="w-full mt-2 bg-purple-600 text-white hover:bg-purple-700"
                             disabled={processing === auction._id}

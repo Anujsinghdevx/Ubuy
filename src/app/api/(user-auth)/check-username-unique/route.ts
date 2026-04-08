@@ -1,60 +1,20 @@
-import dbConnect from '@/lib/dbConnect';
-import { z } from 'zod';
-import { usernameValidation } from '@/schemas/SignUpSchema';
-import User from '@/models/User';
-
-const UsernameQuerySchema = z.object({
-  username: usernameValidation,
-});
+import { NextResponse } from 'next/server';
+import { backendJsonRequest } from '@/lib/backend-api';
 
 export async function GET(request: Request) {
-  await dbConnect();
-
   try {
     const { searchParams } = new URL(request.url);
-    const queryParams = {
-      username: searchParams.get('username'),
-    };
-    const result = UsernameQuerySchema.safeParse(queryParams);
-    if (!result.success) {
-      const usernameErrors = result.error.format().username?._errors || [];
-      return Response.json(
-        {
-          success: false,
-          message:
-            usernameErrors?.length > 0 ? usernameErrors.join(',') : 'Invalid query parameters',
-        },
-        { status: 400 }
-      );
-    }
-    const { username } = result.data;
-
-    const existingUser = await User.findOne({ username });
-
-    if (existingUser) {
-      return Response.json(
-        {
-          success: false,
-          message: 'Username is already taken',
-        },
-        { status: 400 }
-      );
-    }
-    return Response.json(
+    const username = searchParams.get('username') || '';
+    const { status, data } = await backendJsonRequest(
+      `/v1/auth/check-username-unique?username=${encodeURIComponent(username)}`,
       {
-        success: true,
-        message: 'Username is available',
-      },
-      { status: 200 }
+        method: 'GET',
+      }
     );
+
+    return NextResponse.json(data, { status });
   } catch (error) {
     console.log('Error checking username', error);
-    return Response.json(
-      {
-        success: false,
-        message: 'Error checking Username',
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Error checking Username' }, { status: 500 });
   }
 }

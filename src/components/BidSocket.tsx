@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import Pusher from 'pusher-js';
+import { useSession } from 'next-auth/react';
+import { useAuctionSocket } from '@/hooks/useAuctionSocket';
 
 interface BidData {
   _id: string;
@@ -19,23 +20,13 @@ export default function BidSocket({
   auctionId: string;
   onBidReceived: (data: BidData) => void;
 }) {
-  useEffect(() => {
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-    });
+  const { data: session } = useSession();
 
-    const channel = pusher.subscribe(`auction-${auctionId}`);
-
-    channel.bind('new-bid', (data: BidData) => {
-      onBidReceived(data);
-    });
-
-    return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
-      pusher.disconnect();
-    };
-  }, [auctionId, onBidReceived]);
+  useAuctionSocket({
+    auctionId,
+    token: session?.accessToken || session?.user?.accessToken || null,
+    onNewBid: (data) => onBidReceived(data as unknown as BidData),
+  });
 
   return null;
 }
