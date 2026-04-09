@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IndianRupee, Timer, Tag, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,106 @@ type Creator = {
   image?: string;
 };
 
+const toRecord = (value: unknown): Record<string, unknown> | null => {
+  if (!value || typeof value !== 'object') return null;
+  return value as Record<string, unknown>;
+};
+
+const normalizeBidders = (raw: unknown): Bidder[] => {
+  const record = toRecord(raw);
+  const source = Array.isArray(raw)
+    ? raw
+    : (record?.bidders as unknown) ??
+      (record?.bids as unknown) ??
+      (record?.bidHistory as unknown) ??
+      (record?.topBidders as unknown) ??
+      (record?.items as unknown) ??
+      [];
+
+  if (!Array.isArray(source)) return [];
+
+  return source.map((item, index) => {
+    const bid = toRecord(item) || {};
+    const bidderRaw = toRecord(bid.bidder);
+
+    const bidderId = String(
+      bidderRaw?._id ?? bid.bidderId ?? bid.userId ?? bid.user ?? ''
+    );
+
+    const bidderName = String(
+      bid.bidderName ??
+        bidderRaw?.name ??
+        bidderRaw?.username ??
+        toRecord(bid.user)?.name ??
+        toRecord(bid.user)?.username ??
+        bid.userName ??
+        bid.displayName ??
+        bid.name ??
+        'Anonymous'
+    );
+
+    const amountRaw = bid.amount ?? bid.bidAmount ?? bid.price ?? bid.maxBid;
+    const amount = typeof amountRaw === 'number' ? amountRaw : Number(amountRaw ?? 0);
+
+    const bidTime = String(
+      bid.bidTime ??
+        bid.time ??
+        bid.createdAt ??
+        bid.timestamp ??
+        bid.updatedAt ??
+        new Date().toISOString()
+    );
+
+    return {
+      _id: String(bid._id ?? bid.id ?? `${Date.now()}-${index}`),
+      bidderName,
+      amount: Number.isFinite(amount) ? amount : 0,
+      bidTime,
+      bidder: { _id: bidderId },
+    };
+  });
+};
+
+const normalizeAuction = (raw: unknown): Auction => {
+  const record = toRecord(raw) || {};
+
+  return {
+    _id: String(record._id ?? record.id ?? ''),
+    title: String(record.title ?? ''),
+    description: String(record.description ?? ''),
+    images: Array.isArray(record.images)
+      ? (record.images.filter((img) => typeof img === 'string') as string[])
+      : [],
+    currentPrice:
+      typeof record.currentPrice === 'number'
+        ? record.currentPrice
+        : Number(record.currentPrice ?? record.startingPrice ?? 0),
+    startingPrice:
+      typeof record.startingPrice === 'number'
+        ? record.startingPrice
+        : Number(record.startingPrice ?? 0),
+    category: String(record.category ?? ''),
+    endTime: String(record.endTime ?? record.endsAt ?? ''),
+    status: String(record.status ?? 'active'),
+    bidders: normalizeBidders(record),
+    createdBy: String(record.createdBy ?? ''),
+    paymentStatus:
+      typeof record.paymentStatus === 'string' ? record.paymentStatus : undefined,
+  };
+};
+
+const extractBiddersPayload = (raw: unknown): unknown => {
+  const record = toRecord(raw);
+  if (!record) return raw;
+
+  return (
+    (record.data as unknown) ??
+    (record.bidders as unknown) ??
+    (record.topBidders as unknown) ??
+    raw
+  );
+};
+
 const normalizeCreator = (raw: unknown): Creator | null => {
   if (!raw || typeof raw !== 'object') return null;
   const record = raw as Record<string, unknown>;
@@ -61,11 +161,6 @@ const normalizeCreator = (raw: unknown): Creator | null => {
   };
 };
 
-const toRecord = (value: unknown): Record<string, unknown> | null => {
-  if (!value || typeof value !== 'object') return null;
-  return value as Record<string, unknown>;
-};
-
 export default function AuctionDetailPage() {
   const params = useParams();
   const id = params?.id as string | undefined;
@@ -75,6 +170,7 @@ export default function AuctionDetailPage() {
   const [creatorData, setCreatorData] = useState<Creator | null>(null);
   const [loading, setLoading] = useState(true);
   const [bidInputs, setBidInputs] = useState<{ [key: string]: string }>({});
+  const [topBidders, setTopBidders] = useState<Bidder[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -83,44 +179,69 @@ export default function AuctionDetailPage() {
 
   const socketToken = session?.accessToken || session?.user?.accessToken || null;
 
-  useAuctionSocket({
+  const fetchTopBidders = useCallback(async (auctionId: string) => {
+    try {
+      const topBiddersRes = await fetch(`/api/auction/${auctionId}/top-bidders?limit=5`);
+      const topBiddersData = await topBiddersRes.json();
+      if (!topBiddersRes.ok) return;
+
+      const normalized = normalizeBidders(
+        Array.isArray(topBiddersData?.topBidders)
+          ? topBiddersData.topBidders
+          : extractBiddersPayload(topBiddersData)
+      );
+      setTopBidders(normalized);
+      setAuction((prevAuction) =>
+        prevAuction
+          ? {
+              ...prevAuction,
+              bidders: normalized,
+            }
+          : prevAuction
+      );
+    } catch {
+      // Keep existing bidders data as fallback when top-bidders endpoint is unavailable.
+    }
+  }, []);
+
+  const { placeBid } = useAuctionSocket({
     auctionId: id,
     token: socketToken,
     onNewBid: (data) => {
-      const bidderRecord = toRecord(data.bidder);
       setAuction((prevAuction) => {
         if (!prevAuction) return prevAuction;
 
-        const amount = typeof data.amount === 'number' ? data.amount : Number(data.amount);
-        const bidTime =
-          typeof data.bidTime === 'string' ? data.bidTime : new Date().toISOString();
+        const amount = Number.isFinite(data.amount) ? data.amount : prevAuction.currentPrice;
+        const bidTime = data.bidTime || new Date().toISOString();
+        const bidderId = data.bidder?._id || data.bidderId || data.userId || '';
+        const existingBidder = Array.isArray(prevAuction.bidders)
+          ? prevAuction.bidders.find((bid) => bid.bidder?._id === bidderId)
+          : undefined;
         const bidderName =
-          typeof data.bidderName === 'string'
-            ? data.bidderName
-            : typeof bidderRecord?.name === 'string'
-              ? bidderRecord.name
-              : 'Anonymous';
-        const bidderId =
-          typeof bidderRecord?._id === 'string'
-            ? bidderRecord._id
-            : typeof data.bidderId === 'string'
-              ? data.bidderId
-              : '';
+          data.bidderName || data.bidder?.name || existingBidder?.bidderName || 'Anonymous';
 
         const newBid = {
           _id: String(data._id || `${Date.now()}`),
           bidderName,
-          amount: Number.isFinite(amount) ? amount : prevAuction.currentPrice,
+          amount,
           bidTime,
           bidder: { _id: String(bidderId) },
         };
 
+        const currentBidders = Array.isArray(prevAuction.bidders)
+          ? prevAuction.bidders
+          : [];
+
         return {
           ...prevAuction,
           currentPrice: newBid.amount,
-          bidders: [...prevAuction.bidders, newBid],
+          bidders: [...currentBidders, newBid],
         };
       });
+
+      if (id) {
+        void fetchTopBidders(id);
+      }
     },
     onNotificationNew: (data) => {
       const message =
@@ -128,7 +249,12 @@ export default function AuctionDetailPage() {
       toast(message);
     },
     onOutBid: (data) => {
-      const amount = typeof data.amount === 'number' ? data.amount : Number(data.amount);
+      const amount =
+        typeof data.newAmount === 'number'
+          ? data.newAmount
+          : typeof data.amount === 'number'
+            ? data.amount
+            : Number.NaN;
       setAuction((prevAuction) =>
         prevAuction
           ? {
@@ -137,9 +263,7 @@ export default function AuctionDetailPage() {
             }
           : prevAuction
       );
-      toast.error(
-        typeof data.message === 'string' ? data.message : 'You have been outbid.'
-      );
+      toast.error(data.message || 'You have been outbid.');
     },
     onAuctionEnded: () => {
       setAuction((prevAuction) =>
@@ -193,6 +317,15 @@ export default function AuctionDetailPage() {
       toast.error('Auction deleted.');
       window.location.href = '/auctions';
     },
+    onConnectError: (message) => {
+      toast.error(message || 'Unable to connect to live bidding.');
+    },
+    onSocketError: (message) => {
+      toast.error(message || 'Realtime bid error occurred.');
+    },
+    onReconnect: () => {
+      toast.success('Reconnected to live bidding.');
+    },
   });
 
   useEffect(() => {
@@ -229,29 +362,37 @@ export default function AuctionDetailPage() {
     }
 
     try {
-      const res = await fetch(`/api/auction/bid/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bidAmount }),
-      });
+      const result = await placeBid({ auctionId: id, amount: bidAmount });
+      if (!result.ok) {
+        const normalized = result.error.toLowerCase();
+        const shouldFallbackToHttp =
+          normalized.includes('timed out') ||
+          normalized.includes('realtime connection') ||
+          normalized.includes('transport close');
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || result.message || 'Failed to place bid');
+        if (shouldFallbackToHttp) {
+          const res = await fetch(`/api/auction/bid/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bidAmount }),
+          });
+
+          const fallbackJson = await res.json();
+          if (!res.ok) {
+            throw new Error(
+              fallbackJson.error || fallbackJson.message || result.error || 'Failed to place bid'
+            );
+          }
+
+          toast.success('Bid placed successfully!');
+          setBidInputs({ ...bidInputs, [id]: '' });
+          return;
+        }
+
+        throw new Error(result.error || 'Failed to place bid');
+      }
 
       toast.success('Bid placed successfully!');
-
-      const updatedRes = await fetch(`/api/auction/${id}/details`);
-      const updatedData = await updatedRes.json();
-      if (updatedData.success) {
-        setAuction(updatedData.auction);
-
-        // fetch creator info
-        if (updatedData.auction.createdBy) {
-          const creatorRes = await fetch(`/api/auction/public/${updatedData.auction.createdBy}`);
-          const creatorJson = await creatorRes.json();
-          if (creatorJson.success) setCreatorData(normalizeCreator(creatorJson.user));
-        }
-      }
 
       setBidInputs({ ...bidInputs, [id]: '' });
     } catch (error) {
@@ -315,7 +456,11 @@ export default function AuctionDetailPage() {
         const res = await fetch(`/api/auction/${id}/details`);
         const data = await res.json();
         if (data.success) {
-          setAuction(data.auction);
+          setAuction(normalizeAuction(data.auction));
+
+          if (id) {
+            await fetchTopBidders(id);
+          }
 
           // fetch creator info
           if (data.auction.createdBy) {
@@ -331,7 +476,7 @@ export default function AuctionDetailPage() {
     }
 
     if (id) fetchAuction();
-  }, [id]);
+  }, [id, fetchTopBidders]);
 
   useEffect(() => {
     if (auction?.images && auction.images.length > 0) {
@@ -539,7 +684,7 @@ export default function AuctionDetailPage() {
             <h2 className="bg-gray-100 border flex justify-center px-4 py-2 font-semibold tracking-wide text-xl md:text-2xl">
               Top 5 Bidders
             </h2>
-            <BiddersTable bidders={auction.bidders} />
+            <BiddersTable bidders={topBidders.length > 0 ? topBidders : auction.bidders} />
           </div>
         </div>
       </div>
